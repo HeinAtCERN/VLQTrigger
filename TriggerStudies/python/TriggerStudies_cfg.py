@@ -389,27 +389,14 @@ dizionario={'tH800':tH800list,'tH1200':tH1200list,'bW800':bW800list,'bW1200':bW1
 process.TFileService=cms.Service("TFileService",
 fileName=cms.string('trgout_'+NAME+'nocsv.root'))
 
-process.source = cms.Source("PoolSource",
-    # replace 'myfile.root' with the source file you want to use
-    fileNames = cms.untracked.vstring(
-    #    'file:/nfs/dust/cms/user/marchesi/RECO_files_new/CMSSW_7_2_0_pre8/tprime_RECO_TpjM1200_bW_13TeV_1.root',
-#'file:/nfs/dust/cms/user/marchesi/RECO_files_new/CMSSW_7_2_0_pre8/tprime_RECO_TpjM1200_bW_13TeV_10.root'
-
-#'file:/nfs/dust/cms/user/usaiem/trigger/CMSSW_7_2_0_pre7/src/B2G-Spring14dr-00019.root'
-
-#"file:/pnfs/desy.de/cms/tier2/store/mc/Spring14dr/QCD_Pt-600to800_Tune4C_13TeV_pythia8/GEN-SIM-RECODEBUG/castor_PU_S14_POSTLS170_V6-v1/00000/0210858E-A409-E411-814E-0025901D40CA.root"
-
-dizionario[NAME]
-
-    )
+process.source = cms.Source(
+    "PoolSource",
+    fileNames=cms.untracked.vstring(dizionario[NAME]),
+    duplicateCheckMode=cms.untracked.string('noDuplicateCheck'),
 )
-process.source.duplicateCheckMode = cms.untracked.string('noDuplicateCheck')
 
-#process.triggerstudies = cms.EDAnalyzer('TriggerStudies'
-#)
-
-process.load("MyStudies.TriggerStudies.TriggerMenu_cff")
-
+process.load("VLQTrigger.TriggerStudies.TriggerMenu_cff")
+print process.p
 
 # minHT_par = "0"
 # minMass_par = "20"

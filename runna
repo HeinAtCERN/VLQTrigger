@@ -1,4 +1,0 @@
-cmsRun TriggerStudies/python/TriggerStudies_cfg.py tH1200
-cmsRun TriggerStudies/python/TriggerStudies_cfg.py tH800
-cmsRun TriggerStudies/python/TriggerStudies_cfg.py bW1200
-cmsRun TriggerStudies/python/TriggerStudies_cfg.py bW800

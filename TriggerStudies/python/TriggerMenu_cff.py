@@ -1,43 +1,76 @@
 import FWCore.ParameterSet.Config as cms
 
 
-minHT_par = "0"
-minMass_par = "20"
-minPt_par = "100"
-minCSV_par = "0.814"
-
-minMass_par = "100"#tH
-minMass8_par = "60"#bW
-minPt8_par = "200"#tH bW
-
-
-triggermenu=["HLT_PFHT900_v1",
-"HLT_AK8PFJet360TrimMod_Mass30_v1",
-"HLT_AK8PFHT850_TrimR0p1PT0p03Mass50_v1",
-"HLT_AK8DiPFJet300_200TrimMod_Mass30_BTagCSVLoose0p3_v1",
-"HLT_AK8DiPFJet300_200TrimMod_Mass30_BTagCSVLoose0p5_v1",
-"HLT_AK8DiPFJet280_200TrimMod_Mass30_BTagCSVLoose0p3_v1",
-"HLT_AK8DiPFJet280_200TrimMod_Mass30_BTagCSVLoose0p5_v1",
-"HLT_AK8DiPFJet300_200TrimMod_Mass30_BTagCSVLoose0p3_DoubleJetC100_v1",
-#"HLT_Ele45_CaloIdVT_GsfTrkIdT_PFJet200_PFJet50_v1",
-#"HLT_Mu40_eta2p1_PFJet200_PFJet50_v1",
-"HLT_PFHT750_4Jet_v1"]
+triggermenu = [
+    "HLT_Ele45_CaloIdVT_GsfTrkIdT_PFJet200_PFJet50_v1",
+    "HLT_Mu40_eta2p1_PFJet200_PFJet50_v1"
+]
 
 for triggerpath in triggermenu:
-  globals()[triggerpath[4:-3]]=cms.EDAnalyzer("TriggerStudies",
-    triggerPath = cms.string( triggerpath ),
-    pfJets = cms.InputTag( "ak4PFJetsCHS" ),
-    pfJets8 = cms.InputTag( "ak8PFJetsCHS" ),
-    minHT = cms.double(minHT_par),
-    minMass = cms.double(minMass_par),
-    minPt = cms.double(minPt_par),
-    minCSV = cms.double(minCSV_par),
-    minMass8 = cms.double(minMass8_par),
-    minPt8 = cms.double(minPt8_par)
+    globals()[triggerpath[4:-3]] = cms.EDAnalyzer(
+        "TriggerStudies",
+        trigger_path = cms.string(triggerpath),
+        jets_inp     = cms.InputTag("ak4PFJetsCHS"),
+        muon_inp     = cms.InputTag("muons"),
+        ele_inp      = cms.InputTag("gedGsfElectrons"),
+        jet_lead_pt  = cms.double(220),
+        jet_subl_pt  = cms.double(55),
+        jet_eta      = cms.double(2.5),
+        muon_pt_cut  = cms.double(43.),
+        ele_pt_cut   = cms.double(48.),
+        muon_cut     = cms.string(
+            'pt > 43 && '
+            'abs(eta) < 2.1 && '
+            'isGlobalMuon'
+        ),
+        ele_cut      = cms.string(
+            'pt > 48 && '
+            'abs(eta) < 1.479 ?'
+            '( '   # Barrel
+              'abs(deltaEtaSuperClusterTrackAtVtx) < 0.007 && '
+              'abs(deltaPhiSuperClusterTrackAtVtx) < 0.15 && '
+              'sigmaIetaIeta < 0.03 && '
+              'hadronicOverEm < 0.1 && '
+              'dr03EcalRecHitSumEt/pt < 0.2 && '
+              'dr03HcalTowerSumEt/pt < 0.2 && '
+              'dr03TkSumPt/pt < 0.2 &&'
+              'abs(1/ecalEnergy - 1/trackMomentumAtVtx.p) < 0.05'
+            '): abs(eta) < 2.5 ? ('  # Endcap
+              'abs(deltaEtaSuperClusterTrackAtVtx) < 0.009 && '
+              'abs(deltaPhiSuperClusterTrackAtVtx) < 0.1 && '
+              'sigmaIetaIeta < 0.01 && '
+              'hadronicOverEm < 0.12 && '
+              'dr03EcalRecHitSumEt/pt < 0.2 && '
+              'dr03HcalTowerSumEt/pt < 0.2 && '
+              'dr03TkSumPt/pt < 0.2 &&'
+              'abs(1/ecalEnergy - 1/trackMomentumAtVtx.p) < 0.05'
+            ') : 0'
+        ),
+        mode         = cms.int32(0 if 'Mu40' in triggerpath else 1),
     )
 
-percorso=globals()[triggermenu[0][4:-3]]
-for triggerpath in triggermenu[1:]:
-  percorso+=globals()[triggerpath[4:-3]]
-p=cms.Path(percorso)
+p = cms.Path()
+for triggerpath in triggermenu:
+    p += globals()[triggerpath[4:-3]]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
