@@ -125,10 +125,10 @@ static bool accept_ele(const reco::GsfElectron& e)
 //      abs(e.deltaEtaSuperClusterTrackAtVtx()) < 0.007 &&
 //      abs(e.deltaPhiSuperClusterTrackAtVtx()) < 0.15 &&
       e.sigmaIetaIeta() < 0.03 &&
-      e.hadronicOverEm() < 0.1 &&
-      e.dr03EcalRecHitSumEt()/e.pt() < 0.2 &&
-      e.dr03HcalTowerSumEt()/e.pt() < 0.2 &&
-      e.dr03TkSumPt()/e.pt() < 0.2
+      e.hadronicOverEm() < 0.1  // &&
+//      e.dr03EcalRecHitSumEt()/e.pt() < 0.2 &&
+//      e.dr03HcalTowerSumEt()/e.pt() < 0.2 &&
+//      e.dr03TkSumPt()/e.pt() < 0.2
     ):(                                         // Endcap
       abs(e.eta()) < 2.5 &&
       e.pt() > 48 &&
@@ -136,10 +136,10 @@ static bool accept_ele(const reco::GsfElectron& e)
 //      abs(e.deltaEtaSuperClusterTrackAtVtx()) < 0.009 &&
 //      abs(e.deltaPhiSuperClusterTrackAtVtx()) < 0.1 &&
       e.sigmaIetaIeta() < 0.01 &&
-      e.hadronicOverEm() < 0.12 &&
-      e.dr03EcalRecHitSumEt()/e.pt() < 0.2 &&
-      e.dr03HcalTowerSumEt()/e.pt() < 0.2 &&
-      e.dr03TkSumPt()/e.pt() < 0.2
+      e.hadronicOverEm() < 0.12  // &&
+//      e.dr03EcalRecHitSumEt()/e.pt() < 0.2 &&
+//      e.dr03HcalTowerSumEt()/e.pt() < 0.2 &&
+//      e.dr03TkSumPt()/e.pt() < 0.2
     );
 }
 
