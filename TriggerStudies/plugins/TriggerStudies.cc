@@ -249,9 +249,11 @@ TriggerStudies::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
    }
 
    // check ht
-   histos1D_[ "HTDenom" ]->Fill(ht);
-   if (trig_accept) {
-      histos1D_[ "HTPassing" ]->Fill(ht);
+   if (lepton_pt > lepton_pt_cut) {
+      histos1D_[ "HTDenom" ]->Fill(ht);
+      if (trig_accept) {
+         histos1D_[ "HTPassing" ]->Fill(ht);
+      }
    }
 }
 
