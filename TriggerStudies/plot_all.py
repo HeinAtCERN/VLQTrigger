@@ -2,9 +2,10 @@ import ROOT
 import os
 from itertools import ifilter
 
-import varial.tools as tools
-import varial.operations as op
 import varial.generators as gen
+import varial.operations as op
+import varial.rendering as rnd
+import varial.tools as tools
 
 
 def plot_maker(wrps):
@@ -51,6 +52,7 @@ def plot_maker(wrps):
 def plotter_factory(**kws):
     kws['plot_grouper'] = plot_maker
     kws['plot_setup'] = None
+    kws['canvas_decorators'] = [rnd.Legend]
     return tools.FSPlotter(**kws)
 
 
