@@ -19,7 +19,7 @@ def plot_maker(wrps):
                                   or n.endswith('Denom')),
                    el.keys())
     out = []
-    for n in names:
+    for n in sorted(names):
         out.append([
             el[n + 'Denom'],
             mu[n + 'Denom'],

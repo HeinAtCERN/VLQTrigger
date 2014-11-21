@@ -181,12 +181,12 @@ TriggerStudies::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
    edm::Handle<edm::View<reco::GsfElectron> > ele_coll;
    iEvent.getByLabel(ele_inp_, ele_coll);
 
-   //pull out pts and calculate HT
+   //pull out pts and calculate ST
    double lepton_pt = 0;
    double lepton_pt_cut = 0;
    double jet_lead_pt = 0;
    double jet_subl_pt = 0;
-   double ht = 0;
+   double st = 0;
    if (mode_ == 1) {
       lepton_pt_cut = ele_pt_cut_;
       for (auto i = ele_coll->begin(); i!=ele_coll->end(); ++i) {
@@ -216,16 +216,16 @@ TriggerStudies::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
    }
    for (auto i = jets_coll->begin(); i!=jets_coll->end(); ++i) {
       if (fabs(i->eta()) < jet_eta_ && i->pt() > 40.) {
-         ht += i->pt();
+         st += i->pt();
       }
    }
-   ht += lepton_pt;
+   st += lepton_pt;
 
    // baseline
    histos1D_[ "leptonPt" ]->Fill(lepton_pt);
    histos1D_[ "jetPt"    ]->Fill(jet_lead_pt);
    histos1D_[ "jet2Pt"   ]->Fill(jet_subl_pt);
-   histos1D_[ "HT"       ]->Fill(ht);
+   histos1D_[ "ST"       ]->Fill(st);
 
    // check trigger legs
    bool trig_accept = triggerResults->accept(triggerBit);
@@ -248,11 +248,11 @@ TriggerStudies::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
       }
    }
 
-   // check ht
+   // check st
    if (lepton_pt > lepton_pt_cut) {
-      histos1D_[ "HTDenom" ]->Fill(ht);
+      histos1D_[ "STDenom" ]->Fill(st);
       if (trig_accept) {
-         histos1D_[ "HTPassing" ]->Fill(ht);
+         histos1D_[ "STPassing" ]->Fill(st);
       }
    }
 }
@@ -265,21 +265,21 @@ TriggerStudies::beginJob()
   
   edm::Service< TFileService > fs;
 
-  histos1D_[ "leptonPt"         ] = fs->make< TH1D >( "leptonPt", ";Lepton Pt [GeV];", 40, 0., 1000);
-  histos1D_[ "leptonPtDenom"    ] = fs->make< TH1D >( "leptonPtDenom", ";Lepton Pt [GeV];", 40, 0., 1000);
-  histos1D_[ "leptonPtPassing"  ] = fs->make< TH1D >( "leptonPtPassing", ";Lepton Pt [GeV];", 40, 0., 1000);
+  histos1D_[ "leptonPt"         ] = fs->make< TH1D >( "1leptonPt", ";Lepton Pt [GeV];", 40, 0., 1000);
+  histos1D_[ "leptonPtDenom"    ] = fs->make< TH1D >( "1leptonPtDenom", ";Lepton Pt [GeV];", 40, 0., 1000);
+  histos1D_[ "leptonPtPassing"  ] = fs->make< TH1D >( "1leptonPtPassing", ";Lepton Pt [GeV];", 40, 0., 1000);
 
-  histos1D_[ "jetPt"            ] = fs->make< TH1D >( "jetPt", ";Leading Jet Pt [GeV];", 40, 0., 1000);
-  histos1D_[ "jetPtDenom"       ] = fs->make< TH1D >( "jetPtDenom", ";Leading Jet Pt [GeV];", 40, 0., 1000);
-  histos1D_[ "jetPtPassing"     ] = fs->make< TH1D >( "jetPtPassing", ";Leading Jet Pt [GeV];", 40, 0., 1000);
+  histos1D_[ "jetPt"            ] = fs->make< TH1D >( "2leadJetPt", ";Leading Jet Pt [GeV];", 40, 0., 1000);
+  histos1D_[ "jetPtDenom"       ] = fs->make< TH1D >( "2leadJetPtDenom", ";Leading Jet Pt [GeV];", 40, 0., 1000);
+  histos1D_[ "jetPtPassing"     ] = fs->make< TH1D >( "2leadJetPtPassing", ";Leading Jet Pt [GeV];", 40, 0., 1000);
 
-  histos1D_[ "jet2Pt"           ] = fs->make< TH1D >( "jetPt2", ";Subleading Jet Pt [GeV];", 40, 0., 1000);
-  histos1D_[ "jet2PtDenom"      ] = fs->make< TH1D >( "jetPt2Denom", ";Subleading Jet Pt [GeV];", 40, 0., 1000);
-  histos1D_[ "jet2PtPassing"    ] = fs->make< TH1D >( "jetPt2Passing", ";Subleading Jet Pt [GeV];", 40, 0., 1000);
+  histos1D_[ "jet2Pt"           ] = fs->make< TH1D >( "3subleadJetPt", ";Subleading Jet Pt [GeV];", 40, 0., 1000);
+  histos1D_[ "jet2PtDenom"      ] = fs->make< TH1D >( "3subleadJetPtDenom", ";Subleading Jet Pt [GeV];", 40, 0., 1000);
+  histos1D_[ "jet2PtPassing"    ] = fs->make< TH1D >( "3subleadJetPtPassing", ";Subleading Jet Pt [GeV];", 40, 0., 1000);
 
-  histos1D_[ "HT"               ] = fs->make< TH1D >( "HT", ";HT [GeV];", 40, 0., 2000);
-  histos1D_[ "HTDenom"          ] = fs->make< TH1D >( "HTDenom", ";HT [GeV];", 40, 0., 2000);
-  histos1D_[ "HTPassing"        ] = fs->make< TH1D >( "HTPassing", ";HT [GeV];", 40, 0., 2000);
+  histos1D_[ "ST"               ] = fs->make< TH1D >( "4ST", ";ST [GeV];", 40, 0., 2000);
+  histos1D_[ "STDenom"          ] = fs->make< TH1D >( "4STDenom", ";ST [GeV];", 40, 0., 2000);
+  histos1D_[ "STPassing"        ] = fs->make< TH1D >( "4STPassing", ";ST [GeV];", 40, 0., 2000);
 }
 
 // ------------ method called once each job just after ending the event loop  ------------
