@@ -56,8 +56,8 @@ def plotter_factory(**kws):
     return tools.FSPlotter(**kws)
 
 
-os.system('rm -r RootFilePlots')
-tools.mk_plotter_chain(plotter_factory, flat=True).run()
+os.system('rm -r vlq_trig')
+tools.mk_plotter_chain(plotter_factory, flat=True, name='vlq_trig').run()
 tools.WebCreator().run()
-os.system('rm -r ~/www/RootFilePlots')
-os.system('cp -r RootFilePlots ~/www')
+os.system('rm -r ~/www/vlq_trig')
+os.system('cp -r vlq_trig ~/www')
