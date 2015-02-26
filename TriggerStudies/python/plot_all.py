@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 import ROOT
 import os
 from itertools import ifilter
@@ -53,11 +55,15 @@ def plotter_factory(**kws):
     kws['plot_grouper'] = plot_maker
     kws['plot_setup'] = None
     kws['canvas_decorators'] = [rnd.Legend]
-    return tools.FSPlotter(**kws)
+    return tools.Plotter(**kws)
 
 
 os.system('rm -r vlq_trig')
-tools.mk_plotter_chain(plotter_factory, flat=True, name='vlq_trig').run()
+tools.mk_rootfile_plotter(
+    plotter_factory=plotter_factory,
+    flat=True,
+    name='vlq_trig'
+).run()
 tools.WebCreator().run()
 os.system('rm -r ~/www/vlq_trig')
 os.system('cp -r vlq_trig ~/www')
