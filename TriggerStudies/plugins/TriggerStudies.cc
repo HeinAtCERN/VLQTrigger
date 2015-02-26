@@ -40,14 +40,14 @@
 #include "FWCore/Common/interface/TriggerNames.h"
 #include "DataFormats/MuonReco/interface/Muon.h"
 #include "DataFormats/EgammaCandidates/interface/GsfElectron.h"
+#include "DataFormats/VertexReco/interface/Vertex.h"
 #include "DataFormats/JetReco/interface/PFJet.h"
 #include "DataFormats/JetReco/interface/PFJetCollection.h"
 #include "SimDataFormats/GeneratorProducts/interface/HepMCProduct.h"
 #include "SimDataFormats/GeneratorProducts/interface/GenEventInfoProduct.h"
 #include "SimDataFormats/GeneratorProducts/interface/GenRunInfoProduct.h"
 
-#include "CommonTools/Utils/interface/StringCutObjectSelector.h"
-#include "CommonTools/Utils/interface/StringObjectFunction.h"
+#include "DataFormats/MuonReco/interface/MuonSelectors.h"
 
 //
 // class declaration
@@ -82,8 +82,6 @@ class TriggerStudies : public edm::EDAnalyzer {
       double jet_eta_;
       double muon_pt_cut_;
       double ele_pt_cut_;
-      StringObjectFunction<reco::Muon, false> muon_cut_;
-//      StringObjectFunction<reco::GsfElectron, false> ele_cut_;
       int mode_;  // muon: 0, electron: 1
 
       HLTConfigProvider hltConfig;
@@ -93,9 +91,7 @@ class TriggerStudies : public edm::EDAnalyzer {
 //
 // constructors and destructor
 //
-TriggerStudies::TriggerStudies(const edm::ParameterSet& iConfig):
-   muon_cut_(iConfig.getParameter<std::string>("muon_cut")) //,
-//   ele_cut_(iConfig.getParameter<std::string>("ele_cut"))
+TriggerStudies::TriggerStudies(const edm::ParameterSet& iConfig)
 {
    triggerPath_     = iConfig.getParameter<std::string> ( "trigger_path" );
    jets_inp_	    = iConfig.getParameter<edm::InputTag> ( "jets_inp" );
@@ -119,27 +115,33 @@ TriggerStudies::~TriggerStudies()
 
 static bool accept_ele(const reco::GsfElectron& e)
 {
-    return abs(e.eta()) < 1.479 ? (                     // Barrel
-      e.pt() > 48. &&
-//      abs(1 - e.eSuperClusterOverP())/e.ecalEnergy() < 0.05 &&
-//      abs(e.deltaEtaSuperClusterTrackAtVtx()) < 0.007 &&
-//      abs(e.deltaPhiSuperClusterTrackAtVtx()) < 0.15 &&
-      e.sigmaIetaIeta() < 0.03 &&
+    return fabs(e.eta()) < 1.479 ? (                     // Barrel
+      fabs(1 - e.eSuperClusterOverP())/e.ecalEnergy() < 0.05 &&
+      fabs(e.deltaEtaSuperClusterTrackAtVtx()) < 0.009 &&
+      fabs(e.deltaPhiSuperClusterTrackAtVtx()) < 0.1 &&
+      e.sigmaIetaIeta() < 0.01 &&
       e.hadronicOverEm() < 0.1  // &&
 //      e.dr03EcalRecHitSumEt()/e.pt() < 0.2 &&
 //      e.dr03HcalTowerSumEt()/e.pt() < 0.2 &&
 //      e.dr03TkSumPt()/e.pt() < 0.2
     ):(                                         // Endcap
-      abs(e.eta()) < 2.5 &&
-      e.pt() > 48 &&
-//      abs(1 - e.eSuperClusterOverP())/e.ecalEnergy() < 0.05 &&
-//      abs(e.deltaEtaSuperClusterTrackAtVtx()) < 0.009 &&
-//      abs(e.deltaPhiSuperClusterTrackAtVtx()) < 0.1 &&
-      e.sigmaIetaIeta() < 0.01 &&
+      fabs(e.eta()) < 2.5 &&
+      fabs(1 - e.eSuperClusterOverP())/e.ecalEnergy() < 0.05 &&
+      fabs(e.deltaEtaSuperClusterTrackAtVtx()) < 0.007 &&
+      fabs(e.deltaPhiSuperClusterTrackAtVtx()) < 0.15 &&
+      e.sigmaIetaIeta() < 0.03 &&
       e.hadronicOverEm() < 0.12  // &&
 //      e.dr03EcalRecHitSumEt()/e.pt() < 0.2 &&
 //      e.dr03HcalTowerSumEt()/e.pt() < 0.2 &&
 //      e.dr03TkSumPt()/e.pt() < 0.2
+    );
+}
+
+static bool accept_mu(const reco::Muon& m, const reco::Vertex& vtx)
+{
+    return (
+        fabs(m.eta()) < 2.1 &&
+        muon::isTightMuon(m, vtx)
     );
 }
 
@@ -181,6 +183,9 @@ TriggerStudies::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
    edm::Handle<edm::View<reco::GsfElectron> > ele_coll;
    iEvent.getByLabel(ele_inp_, ele_coll);
 
+   edm::Handle<edm::View<reco::Vertex> > vtx_coll;
+   iEvent.getByLabel("offlinePrimaryVertices", vtx_coll);
+
    //pull out pts and calculate ST
    double lepton_pt = 0;
    double lepton_pt_cut = 0;
@@ -190,7 +195,7 @@ TriggerStudies::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
    if (mode_ == 1) {
       lepton_pt_cut = ele_pt_cut_;
       for (auto i = ele_coll->begin(); i!=ele_coll->end(); ++i) {
-         if (accept_ele(*i)) {
+         if ((*i).pt() > ele_pt_cut_ && accept_ele(*i)) {
             lepton_pt = i->pt();
             break;
          }
@@ -198,7 +203,7 @@ TriggerStudies::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
    } else {
       lepton_pt_cut = muon_pt_cut_;
       for (auto i = muon_coll->begin(); i!=muon_coll->end(); ++i) {
-         if (muon_cut_(*i)) {
+         if ((*i).pt() > muon_pt_cut_ && accept_mu(*i, *(vtx_coll->begin()))) {
             lepton_pt = i->pt();
             break;
          }
@@ -206,7 +211,7 @@ TriggerStudies::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
    }
    for (auto i = jets_coll->begin(); i!=jets_coll->end(); ++i) {
       if (fabs(i->eta()) < jet_eta_) {
-         if (!jet_lead_pt) {
+         if (jet_lead_pt < 1.) {
             jet_lead_pt = i->pt();
          } else {
             jet_subl_pt = i->pt();
@@ -229,7 +234,10 @@ TriggerStudies::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 
    // check trigger legs
    bool trig_accept = triggerResults->accept(triggerBit);
-   if (jet_lead_pt > jet_lead_pt_cut_ && jet_subl_pt > jet_subl_pt_cut_) {
+   if (lepton_pt > 1.
+       && jet_lead_pt > jet_lead_pt_cut_
+       && jet_subl_pt > jet_subl_pt_cut_
+   ) {
       histos1D_[ "leptonPtDenom" ]->Fill(lepton_pt);
       if (trig_accept) {
          histos1D_[ "leptonPtPassing" ]->Fill(lepton_pt);
@@ -249,7 +257,9 @@ TriggerStudies::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
    }
 
    // check st
-   if (lepton_pt > lepton_pt_cut) {
+   if (lepton_pt > lepton_pt_cut
+       && jet_lead_pt > jet_lead_pt_cut_
+       && jet_subl_pt > jet_subl_pt_cut_) {
       histos1D_[ "STDenom" ]->Fill(st);
       if (trig_accept) {
          histos1D_[ "STPassing" ]->Fill(st);
