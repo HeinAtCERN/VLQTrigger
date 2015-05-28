@@ -13,7 +13,7 @@ config.JobType.psetName    = 'step1.py'
 config.Data.inputDataset = '/ZPrimeToTTJets_M1000GeV_W100GeV_Tune4C_13TeV-madgraph-tauola/Phys14DR-PU20bx25_PHYS14_25_V1-v1/GEN-SIM-RAW'
 config.Data.splitting = 'FileBased'
 config.Data.unitsPerJob = 1
-#config.Data.totalUnits = 300
+config.Data.totalUnits = 100
 config.Data.publication = True
 
 # This string is used to construct the output dataset name

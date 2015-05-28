@@ -10,7 +10,8 @@ config.JobType.psetName    = 'step2.py'
 
 # This string determines the primary dataset of the newly-produced outputs.
 # For instance, this dataset will be named /CrabTestSingleMu/something/USER
-config.Data.inputDataset = ''
+config.Data.inputDataset = '/TprimeJetToTH_M800GeV_Tune4C_13TeV-madgraph-tauola/htholen-Trig20160506_TpJ_TH_step1-a0f8002c19ea9dda476d548c2bd5f68b/USER'
+config.Data.inputDBS = 'phys03'
 config.Data.splitting = 'FileBased'
 config.Data.unitsPerJob = 1
 #config.Data.totalUnits = 300
