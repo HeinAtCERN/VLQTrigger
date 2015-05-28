@@ -38,6 +38,7 @@
 #include "DataFormats/Common/interface/TriggerResults.h"
 #include "FWCore/Framework/interface/TriggerNamesService.h"
 #include "FWCore/Common/interface/TriggerNames.h"
+#include "DataFormats/HepMCCandidate/interface/GenParticle.h"
 #include "DataFormats/MuonReco/interface/Muon.h"
 #include "DataFormats/EgammaCandidates/interface/GsfElectron.h"
 #include "DataFormats/VertexReco/interface/Vertex.h"
@@ -48,6 +49,10 @@
 #include "SimDataFormats/GeneratorProducts/interface/GenRunInfoProduct.h"
 
 #include "DataFormats/MuonReco/interface/MuonSelectors.h"
+
+
+using namespace edm;
+using namespace reco;
 
 //
 // class declaration
@@ -145,6 +150,17 @@ static bool accept_mu(const reco::Muon& m, const reco::Vertex& vtx)
     );
 }
 
+static bool hasTopMother(const GenParticle * gp, int maxDepth) {
+    if (maxDepth < 0 || !gp->numberOfMothers()) {
+        return false;
+    }
+    const GenParticle * mom = (const GenParticle *) gp->mother(0);
+    if (abs(mom->pdgId()) == 6) {
+        return true;
+    }
+    return hasTopMother(mom, maxDepth-1);
+}
+
 // ------------ method called for each event  ------------
 void
 TriggerStudies::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
@@ -153,7 +169,7 @@ TriggerStudies::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
    using namespace std;
 
    bool changedConfig = false;
-   if (!hltConfig.init(iEvent.getRun(), iSetup, "HLT", changedConfig)) {
+   if (!hltConfig.init(iEvent.getRun(), iSetup, "HLT2", changedConfig)) {
      cout << "Initialization of HLTConfigProvider failed!!" << endl;
      return;
    }
@@ -169,8 +185,22 @@ TriggerStudies::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
      }
      if (triggerBit == -1) cout << "HLT path not found" << endl;
    }
-   
-   edm::InputTag triggerResultsLabel = edm::InputTag("TriggerResults", "", "HLT");
+
+   Handle<vector<GenParticle>> genParticles;
+   iEvent.getByLabel(InputTag("genParticles"), genParticles);
+   int searchedPdgId = mode_ ? 11 : 13;
+   bool foundLepton = false;
+   for (const auto & gp : *(genParticles.product())) {
+     if (abs(gp.pdgId()) == searchedPdgId && hasTopMother(&gp, 10)) {
+       foundLepton = true;
+       break;
+     }
+   }
+   if (!foundLepton) {
+     return;
+   }
+
+   edm::InputTag triggerResultsLabel("TriggerResults", "", "HLT2");
    edm::Handle<edm::TriggerResults> triggerResults;
    iEvent.getByLabel(triggerResultsLabel, triggerResults);
 

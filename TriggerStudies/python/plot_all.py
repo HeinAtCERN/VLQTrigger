@@ -1,69 +1,50 @@
 #!/usr/bin/env python
 
 import ROOT
-import os
-from itertools import ifilter
+import varial
+import varial.tools
 
-import varial.generators as gen
-import varial.operations as op
-import varial.rendering as rnd
-import varial.tools as tools
+varial.settings.max_num_processes = 1
+varial.raise_root_error_level()
 
 
 def plot_maker(wrps):
-    def set_legend(wrps):
+    def set_legend_and_color(wrps):
         for w in wrps:
-            w.legend = w.in_file_path[0]
+            w.legend = w.in_file_path.split('/')[0]
+            if w.legend[:2]=='El':
+                w.primary_object().SetMarkerColor(ROOT.kRed)
+                w.primary_object().SetLineColor(ROOT.kRed)
+            elif w.legend[:2]=='Mu':
+                w.primary_object().SetMarkerColor(ROOT.kBlue)
+                w.primary_object().SetLineColor(ROOT.kBlue)
+            w.val_y_max = 1.1
             yield w
-    wrps = list(set_legend(wrps))
-    el = dict((w.name, w) for w in ifilter(lambda w:w.legend[:2]=='El', wrps))
-    mu = dict((w.name, w) for w in ifilter(lambda w:w.legend[:2]=='Mu', wrps))
-    names = filter(lambda n: not (n.endswith('Passing')
-                                  or n.endswith('Denom')),
-                   el.keys())
-    out = []
-    for n in sorted(names):
-        out.append([
-            el[n + 'Denom'],
-            mu[n + 'Denom'],
-        ])
-        out.append([
-            op.eff([
-                el[n + 'Passing'],
-                el[n + 'Denom'],
-            ], 'cl=0.683 b(1,1) mode', wrp_kws={'val_y_max':1.1}),
-            op.eff([
-                mu[n + 'Passing'],
-                mu[n + 'Denom'],
-            ], 'cl=0.683 b(1,1) mode', wrp_kws={'val_y_max':1.1}),
-        ])
-    col = [ROOT.kGreen, ROOT.kBlue]
-    return (
-        gen.apply_linewidth(
-            gen.apply_markercolor(
-                gen.apply_linecolor(
-                    grp,
-                    col
-                ),
-                col
-            )
-        )
-        for grp in out
-    )
+
+    wrps = varial.gen.gen_make_eff_graphs(wrps, 'Passing', 'Denom', 'Eff')
+    wrps = set_legend_and_color(wrps)
+    wrps = varial.gen.gen_noex_norm_to_integral(wrps)
+    return wrps
+
+
+def plot_grouper(wrps):
+    group_key = lambda w: w.name
+    wrps = sorted(wrps, key=group_key)
+    wrps = varial.gen.group(wrps, group_key)
+    return wrps
+
 
 def plotter_factory(**kws):
-    kws['plot_grouper'] = plot_maker
+    kws['hook_loaded_histos'] = plot_maker
     kws['plot_setup'] = None
-    kws['canvas_decorators'] = [rnd.Legend]
-    return tools.Plotter(**kws)
+    kws['plot_grouper'] = plot_grouper
+    kws['canvas_decorators'] = [varial.rnd.Legend]
+    return varial.tools.Plotter(**kws)
 
 
-os.system('rm -r vlq_trig')
-tools.mk_rootfile_plotter(
+varial.tools.mk_rootfile_plotter(
     plotter_factory=plotter_factory,
     flat=True,
     name='vlq_trig'
 ).run()
-tools.WebCreator().run()
-os.system('rm -r ~/www/vlq_trig')
-os.system('cp -r vlq_trig ~/www')
+varial.tools.WebCreator().run()

@@ -3,7 +3,9 @@ import FWCore.ParameterSet.Config as cms
 
 triggermenu = [
     "HLT_Ele45_CaloIdVT_GsfTrkIdT_PFJet200_PFJet50_v1",
-    "HLT_Mu40_eta2p1_PFJet200_PFJet50_v1"
+    "HLT_Mu40_eta2p1_PFJet200_PFJet50_v1",
+    "HLT_Ele105_CaloIdVT_GsfTrkIdT_v1",
+    "HLT_Mu45_eta2p1_v1",
 ]
 
 for triggerpath in triggermenu:
@@ -18,7 +20,7 @@ for triggerpath in triggermenu:
         jet_eta      = cms.double(2.5),
         muon_pt_cut  = cms.double(45.),
         ele_pt_cut   = cms.double(55.),
-        mode         = cms.int32(0 if 'Mu40' in triggerpath else 1),
+        mode         = cms.int32(0 if triggerpath.startswith('HLT_Mu') else 1),
     )
 
 p = cms.Path()

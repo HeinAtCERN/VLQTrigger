@@ -1,7 +1,9 @@
-cmsRun python/TriggerStudies_cfg.py tH1200 &
-cmsRun python/TriggerStudies_cfg.py tH800  &
-cmsRun python/TriggerStudies_cfg.py bW1200 &
-cmsRun python/TriggerStudies_cfg.py bW800  &
+# cmsRun python/TriggerStudies_cfg.py tH1200 &
+# cmsRun python/TriggerStudies_cfg.py tH800  &
+# cmsRun python/TriggerStudies_cfg.py bW1200 &
+# cmsRun python/TriggerStudies_cfg.py bW800  &
+cmsRun python/TriggerStudies_cfg.py TpJ_TH_M800  &
+cmsRun python/TriggerStudies_cfg.py BpJ_TW_M800  &
 wait
 python python/plot_all.py
 
