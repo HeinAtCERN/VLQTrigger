@@ -82,6 +82,7 @@ class TriggerStudies : public edm::EDAnalyzer {
       edm::InputTag muon_inp_;
       edm::InputTag ele_inp_;
       std::string triggerPath_;
+      std::string triggerPathHT_;
       double jet_lead_pt_cut_;
       double jet_subl_pt_cut_;
       double jet_eta_;
@@ -89,8 +90,11 @@ class TriggerStudies : public edm::EDAnalyzer {
       double ele_pt_cut_;
       int mode_;  // muon: 0, electron: 1
 
-      HLTConfigProvider hltConfig;
+
       int triggerBit;
+      int triggerBitHT;
+
+      HLTConfigProvider hltConfig;
 };
 
 //
@@ -99,6 +103,7 @@ class TriggerStudies : public edm::EDAnalyzer {
 TriggerStudies::TriggerStudies(const edm::ParameterSet& iConfig)
 {
    triggerPath_     = iConfig.getParameter<std::string> ( "trigger_path" );
+   triggerPathHT_   = iConfig.getParameter<std::string> ( "trigger_pathHT" );
    jets_inp_	    = iConfig.getParameter<edm::InputTag> ( "jets_inp" );
    muon_inp_	    = iConfig.getParameter<edm::InputTag> ( "muon_inp" );
    ele_inp_	        = iConfig.getParameter<edm::InputTag> ( "ele_inp" );
@@ -174,31 +179,35 @@ TriggerStudies::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
      return;
    }
    if (changedConfig){
-     std::cout << "the curent menu is " << hltConfig.tableName() << std::endl;
      triggerBit = -1;
+     triggerBitHT = -1;
+     std::cout << "the curent menu is " << hltConfig.tableName() << std::endl;
      hltConfig.dump("Triggers");
      for (size_t j = 0; j < hltConfig.triggerNames().size(); j++) {
        std::cout << TString(hltConfig.triggerNames()[j]) << std::endl;
        if (TString(hltConfig.triggerNames()[j]).Contains(triggerPath_)) {
          triggerBit = j;
        }
+       if (triggerPathHT_.size() && TString(hltConfig.triggerNames()[j]).Contains(triggerPathHT_)) {
+         triggerBitHT = j;
+       }
      }
      if (triggerBit == -1) cout << "HLT path not found" << endl;
    }
 
-   Handle<vector<GenParticle>> genParticles;
-   iEvent.getByLabel(InputTag("genParticles"), genParticles);
-   int searchedPdgId = mode_ ? 11 : 13;
-   bool foundLepton = false;
-   for (const auto & gp : *(genParticles.product())) {
-     if (abs(gp.pdgId()) == searchedPdgId && hasTopMother(&gp, 10)) {
-       foundLepton = true;
-       break;
-     }
-   }
-   if (!foundLepton) {
-     return;
-   }
+   // Handle<vector<GenParticle>> genParticles;
+   // iEvent.getByLabel(InputTag("genParticles"), genParticles);
+   // int searchedPdgId = mode_ ? 11 : 13;
+   // bool foundLepton = false;
+   // for (const auto & gp : *(genParticles.product())) {
+   //   if (abs(gp.pdgId()) == searchedPdgId && hasTopMother(&gp, 10)) {
+   //     foundLepton = true;
+   //     break;
+   //   }
+   // }
+   // if (!foundLepton) {
+   //   return;
+   // }
 
    edm::InputTag triggerResultsLabel("TriggerResults", "", "HLT2");
    edm::Handle<edm::TriggerResults> triggerResults;
@@ -263,7 +272,9 @@ TriggerStudies::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
    histos1D_[ "ST"       ]->Fill(st);
 
    // check trigger legs
-   bool trig_accept = triggerResults->accept(triggerBit);
+   bool trig_accept = (triggerResults->accept(triggerBit) || (
+      (triggerBitHT > -1) && triggerResults->accept(triggerBitHT)
+   ));
    if (lepton_pt > 1.
        && jet_lead_pt > jet_lead_pt_cut_
        && jet_subl_pt > jet_subl_pt_cut_
