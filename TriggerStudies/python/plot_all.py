@@ -13,22 +13,46 @@ def plot_maker(wrps):
         for w in wrps:
             w.legend = w.in_file_path.split('/')[0]
             if w.legend[:2]=='El':
-                w.primary_object().SetMarkerColor(ROOT.kRed)
-                w.primary_object().SetLineColor(ROOT.kRed)
+                w.obj.SetMarkerColor(ROOT.kRed)
+                w.obj.SetLineColor(ROOT.kRed)
             elif w.legend[:2]=='Mu':
-                w.primary_object().SetMarkerColor(ROOT.kBlue)
-                w.primary_object().SetLineColor(ROOT.kBlue)
+                w.obj.SetMarkerColor(ROOT.kBlue)
+                w.obj.SetLineColor(ROOT.kBlue)
             w.val_y_max = 1.1
             yield w
 
+    def format_graphics(wrps):
+        for w in wrps:
+            if not w.name.endswith('Eff'):
+                w.obj.SetFillColor(w.obj.GetMarkerColor() - 9)
+                w.obj.SetLineColor(w.obj.GetMarkerColor() - 9)
+                w.obj.SetFillStyle(3020)
+            else:
+                w.obj.SetMarkerStyle(7)
+                w.obj.draw_option_legend = 'p'
+                w.obj.draw_option = 'pl'
+            yield w
+
+    def format_cross_triggers(w):
+        for w in wrps:
+            if 'PFJet' in w.legend:
+                if w.name.endswith('Eff'):
+                    continue
+                w.obj.SetMarkerColor(w.obj.GetMarkerColor() + 3)
+                w.obj.SetLineColor(w.obj.GetMarkerColor() + 3)
+                yield w
+
     wrps = varial.gen.gen_make_eff_graphs(wrps, 'Passing', 'Denom', 'Eff')
     wrps = set_legend_and_color(wrps)
+    wrps = format_graphics(wrps)
+    wrps = format_cross_triggers(wrps)
     wrps = varial.gen.gen_noex_norm_to_integral(wrps)
     return wrps
 
 
 def plot_grouper(wrps):
-    group_key = lambda w: w.name
+    group_key = lambda w: str('PFHT' in w.in_file_path) + w.name.replace('Eff', '')
+    wrps = sorted(wrps, key=lambda w: w.name[::-1])  # All Eff stuff to back
     wrps = sorted(wrps, key=group_key)
     wrps = varial.gen.group(wrps, group_key)
     return wrps
@@ -45,6 +69,6 @@ def plotter_factory(**kws):
 varial.tools.mk_rootfile_plotter(
     plotter_factory=plotter_factory,
     flat=True,
-    name='vlq_trig'
+    name='VLQTrig'
 ).run()
 varial.tools.WebCreator().run()
