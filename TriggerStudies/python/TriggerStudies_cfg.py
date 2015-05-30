@@ -1,8 +1,6 @@
 import FWCore.ParameterSet.Config as cms
 import sys
 
-NAME = sys.argv[2]
-
 process = cms.Process("TriggerStudies")
 
 process.load("FWCore.MessageService.MessageLogger_cfi")
@@ -22,14 +20,20 @@ dizionario={'TpJ_TH_M800':tH800list,'tH1200':tH1200list,'BpJ_TW_M800':bW800list,
 
 process.TFileService=cms.Service(
     "TFileService",
-    fileName=cms.string('trgout_'+NAME+'.root'),
+    fileName=cms.string('trgout.root'),
 )
 
 process.source = cms.Source(
     "PoolSource",
-    fileNames=cms.untracked.vstring(dizionario[NAME]),
+    fileNames=cms.untracked.vstring('test.root'),
     duplicateCheckMode=cms.untracked.string('noDuplicateCheck'),
     skipBadFiles=cms.untracked.bool(True),
 )
 
 process.load("VLQTrigger.TriggerStudies.TriggerMenu_cff")
+
+
+
+#NAME = sys.argv[2]
+#process.source.fileNames = cms.untracked.vstring(dizionario[NAME])
+#process.TFileService.fileName=cms.string('trgout_'+NAME+'.root')
