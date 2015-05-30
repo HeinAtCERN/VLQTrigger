@@ -23,24 +23,26 @@ def plot_maker(wrps):
 
     def format_graphics(wrps):
         for w in wrps:
-            if not w.name.endswith('Eff'):
-                w.obj.SetFillColor(w.obj.GetMarkerColor() - 9)
-                w.obj.SetLineColor(w.obj.GetMarkerColor() - 9)
-                w.obj.SetFillStyle(3020)
-            else:
+            if w.name.endswith('Eff'):
                 w.obj.SetMarkerStyle(7)
-                w.obj.draw_option_legend = 'p'
-                w.obj.draw_option = 'pl'
+                w.obj.draw_option_legend = 'LP'
+                w.obj.draw_option = 'LP'
+            else:
+                col = w.obj.GetMarkerColor() - 9
+                w.obj.SetFillColor(col)
+                w.obj.SetLineColor(col)
+                w.obj.SetFillStyle(3020)
             yield w
 
-    def format_cross_triggers(w):
+    def format_cross_triggers(wrps):
         for w in wrps:
             if 'PFJet' in w.legend:
-                if w.name.endswith('Eff'):
+                if not w.name.endswith('Eff'):
                     continue
-                w.obj.SetMarkerColor(w.obj.GetMarkerColor() + 3)
-                w.obj.SetLineColor(w.obj.GetMarkerColor() + 3)
-                yield w
+                col = w.obj.GetMarkerColor() + 3
+                w.obj.SetMarkerColor(col)
+                w.obj.SetLineColor(col)
+            yield w
 
     wrps = varial.gen.gen_make_eff_graphs(wrps, 'Passing', 'Denom', 'Eff')
     wrps = set_legend_and_color(wrps)
