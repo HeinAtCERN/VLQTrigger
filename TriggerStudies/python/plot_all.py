@@ -4,7 +4,7 @@ import ROOT
 import varial
 import varial.tools
 
-varial.settings.max_num_processes = 1
+#varial.settings.max_num_processes = 1
 varial.raise_root_error_level()
 
 
@@ -15,9 +15,11 @@ def plot_maker(wrps):
             if w.legend[:2]=='El':
                 w.obj.SetMarkerColor(ROOT.kRed)
                 w.obj.SetLineColor(ROOT.kRed)
+                w.obj.SetFillStyle(3020)
             elif w.legend[:2]=='Mu':
                 w.obj.SetMarkerColor(ROOT.kBlue)
                 w.obj.SetLineColor(ROOT.kBlue)
+                w.obj.SetFillStyle(3019)
             w.val_y_max = 1.1
             yield w
 
@@ -25,13 +27,12 @@ def plot_maker(wrps):
         for w in wrps:
             if w.name.endswith('Eff'):
                 w.obj.SetMarkerStyle(7)
-                w.obj.draw_option_legend = 'LP'
-                w.obj.draw_option = 'LP'
+                w.draw_option_legend = 'LP'
+                w.draw_option = 'LP'
             else:
                 col = w.obj.GetMarkerColor() - 9
                 w.obj.SetFillColor(col)
                 w.obj.SetLineColor(col)
-                w.obj.SetFillStyle(3020)
             yield w
 
     def format_cross_triggers(wrps):

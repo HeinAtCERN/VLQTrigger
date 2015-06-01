@@ -81,6 +81,7 @@ class TriggerStudies : public edm::EDAnalyzer {
       edm::InputTag jets_inp_;
       edm::InputTag muon_inp_;
       edm::InputTag ele_inp_;
+      std::string processName_;
       std::string triggerPath_;
       std::string triggerPathHT_;
       double jet_lead_pt_cut_;
@@ -102,6 +103,7 @@ class TriggerStudies : public edm::EDAnalyzer {
 //
 TriggerStudies::TriggerStudies(const edm::ParameterSet& iConfig)
 {
+   processName_     = iConfig.getParameter<std::string> ( "process_name" );
    triggerPath_     = iConfig.getParameter<std::string> ( "trigger_path" );
    triggerPathHT_   = iConfig.getParameter<std::string> ( "trigger_pathHT" );
    jets_inp_	    = iConfig.getParameter<edm::InputTag> ( "jets_inp" );
@@ -174,7 +176,7 @@ TriggerStudies::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
    using namespace std;
 
    bool changedConfig = false;
-   if (!hltConfig.init(iEvent.getRun(), iSetup, "HLT2", changedConfig)) {
+   if (!hltConfig.init(iEvent.getRun(), iSetup, processName_, changedConfig)) {
      cout << "Initialization of HLTConfigProvider failed!!" << endl;
      return;
    }
@@ -209,7 +211,7 @@ TriggerStudies::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
    //   return;
    // }
 
-   edm::InputTag triggerResultsLabel("TriggerResults", "", "HLT2");
+   edm::InputTag triggerResultsLabel("TriggerResults", "", processName_);
    edm::Handle<edm::TriggerResults> triggerResults;
    iEvent.getByLabel(triggerResultsLabel, triggerResults);
 
@@ -234,7 +236,7 @@ TriggerStudies::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
    if (mode_ == 1) {
       lepton_pt_cut = ele_pt_cut_;
       for (auto i = ele_coll->begin(); i!=ele_coll->end(); ++i) {
-         if ((*i).pt() > ele_pt_cut_ && accept_ele(*i)) {
+         if (accept_ele(*i)) {  // (*i).pt() > ele_pt_cut_ && 
             lepton_pt = i->pt();
             break;
          }
@@ -242,7 +244,7 @@ TriggerStudies::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
    } else {
       lepton_pt_cut = muon_pt_cut_;
       for (auto i = muon_coll->begin(); i!=muon_coll->end(); ++i) {
-         if ((*i).pt() > muon_pt_cut_ && accept_mu(*i, *(vtx_coll->begin()))) {
+         if (accept_mu(*i, *(vtx_coll->begin()))) {  // (*i).pt() > muon_pt_cut_ && 
             lepton_pt = i->pt();
             break;
          }

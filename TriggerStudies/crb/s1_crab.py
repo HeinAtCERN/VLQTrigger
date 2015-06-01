@@ -14,7 +14,7 @@ config.Data.inputDataset = '/TprimeTToTH_M-700_LH_TuneCUETP8M1_13TeV-madgraph-py
 #config.Data.inputDBS = 'global'
 config.Data.ignoreLocality=True
 config.Data.splitting = 'FileBased'
-config.Data.unitsPerJob = 20
+config.Data.unitsPerJob = 1
 #config.Data.totalUnits = 300
 config.Data.publication = False
 

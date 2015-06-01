@@ -14,6 +14,7 @@ for with_ht in (True, False):
     for triggerpath in triggermenu:
         globals()[triggerpath[4:-3]+('_OR_'+trig_ht[4:-3] if with_ht else '')] = cms.EDAnalyzer(
             "TriggerStudies",
+            process_name    = cms.string('HLT'),
             trigger_path    = cms.string(triggerpath),
             trigger_pathHT  = cms.string(trig_ht if with_ht else ''),
             jets_inp        = cms.InputTag("ak4PFJetsCHS"),
@@ -23,7 +24,7 @@ for with_ht in (True, False):
             jet_subl_pt     = cms.double(65),
             jet_eta         = cms.double(2.5),
             muon_pt_cut     = cms.double(45.),
-            ele_pt_cut      = cms.double(55.),
+            ele_pt_cut      = cms.double(55. if '_PFJet' in triggerpath else 120.),
             mode            = cms.int32(0 if triggerpath.startswith('HLT_Mu') else 1),
         )
 
