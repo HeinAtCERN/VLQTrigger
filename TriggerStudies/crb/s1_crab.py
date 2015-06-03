@@ -1,7 +1,7 @@
 from CRABClient.UserUtilities import config
 config = config()
 
-config.General.requestName  = 'TrigStudy20160530'
+config.General.requestName  = 'TrigStudy'
 config.General.transferLogs = True
 
 config.JobType.pluginName  = 'Analysis'

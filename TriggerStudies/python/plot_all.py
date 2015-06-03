@@ -40,7 +40,7 @@ def plot_maker(wrps):
             if 'PFJet' in w.legend:
                 if not w.name.endswith('Eff'):
                     continue
-                col = w.obj.GetMarkerColor() + 3
+                col = ROOT.kBlue + 3 if w.legend[:2]=='Mu' else ROOT.kGreen + 1
                 w.obj.SetMarkerColor(col)
                 w.obj.SetLineColor(col)
             yield w
@@ -69,9 +69,9 @@ def plotter_factory(**kws):
     return varial.tools.Plotter(**kws)
 
 
-varial.tools.mk_rootfile_plotter(
+varial.tools.Runner(varial.tools.mk_rootfile_plotter(
     plotter_factory=plotter_factory,
     flat=True,
     name='VLQTrig'
-).run()
+))
 varial.tools.WebCreator().run()

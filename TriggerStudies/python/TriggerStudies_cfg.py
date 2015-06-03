@@ -12,11 +12,6 @@ from Configuration.AlCa.GlobalTag_condDBv2 import GlobalTag
 process.GlobalTag = GlobalTag(process.GlobalTag, 'MCRUN2_74_V9', '')
 
 
-#process.load('Configuration/StandardSequences/FrontierConditions_GlobalTag_cff')
-#process.GlobalTag.globaltag = cms.string('PRE_LS172_V16::All')
-
-from VLQTrigger.TriggerStudies.sample_filenames_PreRun2 import *
-dizionario={'TpJ_TH_M800':tH800list,'tH1200':tH1200list,'BpJ_TW_M800':bW800list,'bW1200':bW1200list}
 
 process.TFileService=cms.Service(
     "TFileService",
@@ -35,5 +30,7 @@ process.load("VLQTrigger.TriggerStudies.TriggerMenu_cff")
 
 
 #NAME = sys.argv[2]
+#from VLQTrigger.TriggerStudies.sample_filenames_PreRun2 import *
+#dizionario={'TpJ_TH_M800':tH800list,'tH1200':tH1200list,'BpJ_TW_M800':bW800list,'bW1200':bW1200list}
 #process.source.fileNames = cms.untracked.vstring(dizionario[NAME])
 #process.TFileService.fileName=cms.string('trgout_'+NAME+'.root')
