@@ -17,7 +17,7 @@ for with_ht in (True, False):
             process_name    = cms.string('HLT'),
             trigger_path    = cms.string(triggerpath),
             trigger_pathHT  = cms.string(trig_ht if with_ht else ''),
-            jets_inp        = cms.InputTag("ak4PFJetsCHS"),
+            jets_inp        = cms.InputTag("ak4PFJetsCHS"),  # pfJetsPFBRECOPFlow"),
             muon_inp        = cms.InputTag("muons"),
             ele_inp         = cms.InputTag("gedGsfElectrons"),
             jet_lead_pt     = cms.double(250),
@@ -28,29 +28,7 @@ for with_ht in (True, False):
             mode            = cms.int32(0 if triggerpath.startswith('HLT_Mu') else 1),
         )
 
-p = cms.Path()
+trigStudySequence = cms.Sequence()
 for with_ht in (True, False):
     for triggerpath in triggermenu:
-        p += globals()[triggerpath[4:-3]+('_OR_'+trig_ht[4:-3] if with_ht else '')]
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+        trigStudySequence += globals()[triggerpath[4:-3]+('_OR_'+trig_ht[4:-3] if with_ht else '')]

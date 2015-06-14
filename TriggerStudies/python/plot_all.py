@@ -6,7 +6,11 @@ import varial.tools
 
 #varial.settings.max_num_processes = 1
 varial.raise_root_error_level()
-
+varial.settings.defaults_Legend.update({
+    'x_pos': 0.2,  # left edge
+    'label_width': 0.2,
+    'label_height': 0.03,
+})
 
 def plot_maker(wrps):
     def set_legend_and_color(wrps):
@@ -43,6 +47,8 @@ def plot_maker(wrps):
                 col = ROOT.kBlue + 3 if w.legend[:2]=='Mu' else ROOT.kGreen + 1
                 w.obj.SetMarkerColor(col)
                 w.obj.SetLineColor(col)
+            elif not w.name.endswith('Eff'):
+                w.legend = 'electrons' if w.legend[:2]=='El' else 'muons'
             yield w
 
     wrps = varial.gen.gen_make_eff_graphs(wrps, 'Passing', 'Denom', 'Eff')
