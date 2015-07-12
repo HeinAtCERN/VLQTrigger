@@ -15,12 +15,12 @@ process.options = cms.untracked.PSet(allowUnscheduled=cms.untracked.bool(True))
 
 process.TFileService=cms.Service(
     "TFileService",
-    fileName=cms.string('trgout_TprimeTToTH_M-800_RH_TuneCUETP8M1_13TeV-madgraph-pythia8_RECO.root'),
+    fileName=cms.string('trgout_test_TprimeB_800.root'),
 )
 
 process.source = cms.Source(
     "PoolSource",
-    fileNames=cms.untracked.vstring('file:TprimeTToTH_M-800_RH_TuneCUETP8M1_13TeV-madgraph-pythia8_RECO.root'),
+    fileNames=cms.untracked.vstring('file:test_TprimeB_800.root'),
     duplicateCheckMode=cms.untracked.string('noDuplicateCheck'),
     skipBadFiles=cms.untracked.bool(True),
 )

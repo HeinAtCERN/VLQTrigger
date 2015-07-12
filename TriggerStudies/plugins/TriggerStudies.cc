@@ -317,21 +317,21 @@ TriggerStudies::beginJob()
   
   edm::Service< TFileService > fs;
 
-  histos1D_[ "leptonPt"         ] = fs->make< TH1D >( "1leptonPt", ";Lepton Pt [GeV];", 70, 1e-20, 700);
-  histos1D_[ "leptonPtDenom"    ] = fs->make< TH1D >( "1leptonPtDenom", ";Lepton Pt [GeV];", 70, 0., 700);
-  histos1D_[ "leptonPtPassing"  ] = fs->make< TH1D >( "1leptonPtPassing", ";Lepton Pt [GeV];", 70, 0., 700);
+  histos1D_[ "leptonPt"         ] = fs->make< TH1D >( "1leptonPt", ";Lepton p_{T} [GeV];", 70, 1e-20, 700);
+  histos1D_[ "leptonPtDenom"    ] = fs->make< TH1D >( "1leptonPtDenom", ";Lepton p_{T} [GeV];", 70, 0., 700);
+  histos1D_[ "leptonPtPassing"  ] = fs->make< TH1D >( "1leptonPtPassing", ";Lepton p_{T} [GeV];", 70, 0., 700);
 
-  histos1D_[ "jetPt"            ] = fs->make< TH1D >( "2leadJetPt", ";Leading Jet Pt [GeV];", 50, 0., 1000);
-  histos1D_[ "jetPtDenom"       ] = fs->make< TH1D >( "2leadJetPtDenom", ";Leading Jet Pt [GeV];", 50, 0., 1000);
-  histos1D_[ "jetPtPassing"     ] = fs->make< TH1D >( "2leadJetPtPassing", ";Leading Jet Pt [GeV];", 50, 0., 1000);
+  histos1D_[ "jetPt"            ] = fs->make< TH1D >( "2leadJetPt", ";Leading Jet p_{T} [GeV];", 50, 0., 1000);
+  histos1D_[ "jetPtDenom"       ] = fs->make< TH1D >( "2leadJetPtDenom", ";Leading Jet p_{T} [GeV];", 50, 0., 1000);
+  histos1D_[ "jetPtPassing"     ] = fs->make< TH1D >( "2leadJetPtPassing", ";Leading Jet p_{T} [GeV];", 50, 0., 1000);
 
-  histos1D_[ "jet2Pt"           ] = fs->make< TH1D >( "3subleadJetPt", ";Subleading Jet Pt [GeV];", 50, 0., 1000);
-  histos1D_[ "jet2PtDenom"      ] = fs->make< TH1D >( "3subleadJetPtDenom", ";Subleading Jet Pt [GeV];", 50, 0., 1000);
-  histos1D_[ "jet2PtPassing"    ] = fs->make< TH1D >( "3subleadJetPtPassing", ";Subleading Jet Pt [GeV];", 50, 0., 1000);
+  histos1D_[ "jet2Pt"           ] = fs->make< TH1D >( "3subleadJetPt", ";Subleading Jet p_{T} [GeV];", 50, 0., 1000);
+  histos1D_[ "jet2PtDenom"      ] = fs->make< TH1D >( "3subleadJetPtDenom", ";Subleading Jet p_{T} [GeV];", 50, 0., 1000);
+  histos1D_[ "jet2PtPassing"    ] = fs->make< TH1D >( "3subleadJetPtPassing", ";Subleading Jet p_{T} [GeV];", 50, 0., 1000);
 
-  histos1D_[ "ST"               ] = fs->make< TH1D >( "4ST", ";ST [GeV];", 40, 0., 2000);
-  histos1D_[ "STDenom"          ] = fs->make< TH1D >( "4STDenom", ";ST [GeV];", 40, 0., 2000);
-  histos1D_[ "STPassing"        ] = fs->make< TH1D >( "4STPassing", ";ST [GeV];", 40, 0., 2000);
+  histos1D_[ "ST"               ] = fs->make< TH1D >( "4ST", ";Sum of p_{T} of Leading Lepton and all Jets with p_{T}>40GeV [GeV];", 40, 0., 2000);
+  histos1D_[ "STDenom"          ] = fs->make< TH1D >( "4STDenom", ";Sum of p_{T} of Leading Lepton and all Jets with p_{T}>40GeV [GeV];", 40, 0., 2000);
+  histos1D_[ "STPassing"        ] = fs->make< TH1D >( "4STPassing", ";Sum of p_{T} of Leading Lepton and all Jets with p_{T}>40GeV [GeV];", 40, 0., 2000);
 }
 
 // ------------ method called once each job just after ending the event loop  ------------
