@@ -83,19 +83,21 @@ class TriggerStudies : public edm::EDAnalyzer {
       edm::InputTag ele_inp_;
       std::string processName_;
       std::string triggerPath_;
-      std::string triggerPathHT_;
+      std::vector<std::string> triggerPathComb_;
       double jet_lead_pt_cut_;
       double jet_subl_pt_cut_;
       double jet_eta_;
       double muon_pt_cut_;
       double ele_pt_cut_;
+      double st_muon_pt_;
+      double st_ele_pt_;
       int mode_;  // muon: 0, electron: 1
 
 
-      int triggerBit;
-      int triggerBitHT;
+      int triggerBit_;
+      std::vector<int> triggerBitsComb_;
 
-      HLTConfigProvider hltConfig;
+      HLTConfigProvider hltConfig_;
 };
 
 //
@@ -104,8 +106,8 @@ class TriggerStudies : public edm::EDAnalyzer {
 TriggerStudies::TriggerStudies(const edm::ParameterSet& iConfig)
 {
    processName_     = iConfig.getParameter<std::string> ( "process_name" );
-   triggerPath_     = iConfig.getParameter<std::string> ( "trigger_path" );
-   triggerPathHT_   = iConfig.getParameter<std::string> ( "trigger_pathHT" );
+   triggerPath_     = iConfig.getParameter<std::string> ( "triggerpath" );
+   triggerPathComb_ = iConfig.getParameter<std::vector<std::string>> ( "triggerpathcomb" );
    jets_inp_	    = iConfig.getParameter<edm::InputTag> ( "jets_inp" );
    muon_inp_	    = iConfig.getParameter<edm::InputTag> ( "muon_inp" );
    ele_inp_	        = iConfig.getParameter<edm::InputTag> ( "ele_inp" );
@@ -114,6 +116,8 @@ TriggerStudies::TriggerStudies(const edm::ParameterSet& iConfig)
    jet_eta_         = iConfig.getParameter<double> ( "jet_eta" );
    muon_pt_cut_     = iConfig.getParameter<double> ( "muon_pt_cut" );
    ele_pt_cut_      = iConfig.getParameter<double> ( "ele_pt_cut" );
+   st_muon_pt_     = iConfig.getParameter<double> ( "st_muon_pt" );
+   st_ele_pt_      = iConfig.getParameter<double> ( "st_ele_pt" );
    mode_            = iConfig.getParameter<int> ( "mode" );
 }
 
@@ -176,25 +180,28 @@ TriggerStudies::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
    using namespace std;
 
    bool changedConfig = false;
-   if (!hltConfig.init(iEvent.getRun(), iSetup, processName_, changedConfig)) {
+   if (!hltConfig_.init(iEvent.getRun(), iSetup, processName_, changedConfig)) {
      cout << "Initialization of HLTConfigProvider failed!!" << endl;
      return;
    }
    if (changedConfig){
-     triggerBit = -1;
-     triggerBitHT = -1;
-     std::cout << "the curent menu is " << hltConfig.tableName() << std::endl;
-     hltConfig.dump("Triggers");
-     for (size_t j = 0; j < hltConfig.triggerNames().size(); j++) {
-       std::cout << TString(hltConfig.triggerNames()[j]) << std::endl;
-       if (TString(hltConfig.triggerNames()[j]).Contains(triggerPath_)) {
-         triggerBit = j;
+     triggerBit_ = -1;
+     triggerBitsComb_.clear();
+     std::cout << "the curent menu is " << hltConfig_.tableName() << std::endl;
+     hltConfig_.dump("Triggers");
+     for (size_t j = 0; j < hltConfig_.triggerNames().size(); j++) {
+       std::cout << TString(hltConfig_.triggerNames()[j]) << std::endl;
+       if (TString(hltConfig_.triggerNames()[j]).Contains(triggerPath_)) {
+         triggerBit_ = j;
        }
-       if (triggerPathHT_.size() && TString(hltConfig.triggerNames()[j]).Contains(triggerPathHT_)) {
-         triggerBitHT = j;
+       for (const auto & trg : triggerPathComb_) {
+         if (TString(hltConfig_.triggerNames()[j]).Contains(trg)) {
+           triggerBitsComb_.push_back(j);
+         }
        }
      }
-     if (triggerBit == -1) cout << "HLT path not found" << endl;
+     if (triggerBit_ == -1) cout << "HLT path not found" << endl;
+     assert(triggerBitsComb_.size() == triggerPathComb_.size());  // need all accepted
    }
 
    // Handle<vector<GenParticle>> genParticles;
@@ -274,9 +281,13 @@ TriggerStudies::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
    histos1D_[ "ST"       ]->Fill(st);
 
    // check trigger legs
-   bool trig_accept = (triggerResults->accept(triggerBit) || (
-      (triggerBitHT > -1) && triggerResults->accept(triggerBitHT)
-   ));
+   bool trig_accept = triggerResults->accept(triggerBit_);
+   for (const int trg : triggerBitsComb_) {
+     trig_accept = trig_accept || triggerResults->accept(trg);
+     if (trig_accept) {
+       break;
+     }
+   }
    if (lepton_pt > 1.
        && jet_lead_pt > jet_lead_pt_cut_
        && jet_subl_pt > jet_subl_pt_cut_
@@ -300,7 +311,8 @@ TriggerStudies::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
    }
 
    // check st
-   if (lepton_pt > 50.
+   double st_lep_pt_cut = (mode_) ? st_ele_pt_ : st_muon_pt_;
+   if (lepton_pt > st_lep_pt_cut
        && jet_lead_pt > 100.) {
       histos1D_[ "STDenom" ]->Fill(st);
       if (trig_accept) {

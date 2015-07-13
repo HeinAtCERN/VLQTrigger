@@ -38,11 +38,11 @@ def plot_maker(wrps):
             if w.legend[:2]=='El':
                 w.obj.SetMarkerColor(ROOT.kRed)
                 w.obj.SetLineColor(ROOT.kRed)
-                w.obj.SetFillStyle(3020)
+                # w.obj.SetFillStyle(3020)
             elif w.legend[:2]=='Mu':
                 w.obj.SetMarkerColor(ROOT.kBlue)
                 w.obj.SetLineColor(ROOT.kBlue)
-                w.obj.SetFillStyle(3019)
+                # w.obj.SetFillStyle(3019)
             w.val_y_max = 1.1
             yield w
 
@@ -59,10 +59,10 @@ def plot_maker(wrps):
                 w.draw_option_legend = None
                 w.draw_option = 'hist'
             else:
-                col = w.obj.GetMarkerColor() - 9
-                w.obj.SetFillColor(col)
-                w.obj.SetLineColor(col)
-                w.obj.SetLineWidth(0)
+                #col = w.obj.GetMarkerColor() - 9
+                w.obj.SetFillColor(17)
+                w.obj.SetLineColor(15)
+                #w.obj.SetLineWidth(0)
             yield w
 
     def format_cross_triggers(wrps):
@@ -70,7 +70,10 @@ def plot_maker(wrps):
             if not w.name.endswith('Eff'):
                 #if not w.name.endswith('Eff'):
                 #    continue
-                w.legend = 'electrons' if w.legend[:2]=='El' else 'muons'
+                if w.legend[:2]=='El':
+                    w.legend = 'underlying distribution'
+                else:
+                    w.draw_option_legend = ''
             elif 'PFJet' in w.legend:
                 col = ROOT.kBlue + 3 if w.legend[:2]=='Mu' else ROOT.kGreen + 1
                 w.obj.SetMarkerColor(col)
@@ -94,7 +97,7 @@ def plot_maker(wrps):
 
 
 def plot_grouper(wrps):
-    group_key = lambda w: str('PFHT' in w.in_file_path) + w.name.replace('Eff', '')
+    group_key = lambda w: str('_COMBO' in w.in_file_path) + w.name.replace('Eff', '')
     wrps = sorted(wrps, key=lambda w: w.name[::-1])  # All Eff stuff to back
     # for w in wrps: print w.name
     wrps = sorted(wrps, key=group_key)
@@ -130,6 +133,7 @@ def plotter_factory(**kws):
 
 
 varial.tools.Runner(varial.tools.mk_rootfile_plotter(
+    #pattern='trgout_test_TprimeB_800.root',
     plotter_factory=plotter_factory,
     flat=True,
     name='VLQTrig'

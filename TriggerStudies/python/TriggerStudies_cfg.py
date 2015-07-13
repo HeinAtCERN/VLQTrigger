@@ -20,7 +20,11 @@ process.TFileService=cms.Service(
 
 process.source = cms.Source(
     "PoolSource",
-    fileNames=cms.untracked.vstring('file:test_TprimeB_800.root'),
+    fileNames=cms.untracked.vstring(
+        'file:/nfs/dust/cms/user/tholenhe/tmp/test_TprimeB_800.root',
+        #'file:/nfs/dust/cms/user/tholenhe/tmp/GENSIMRAWHLT_26.root',
+        #'file:/nfs/dust/cms/user/tholenhe/tmp/GENSIMRAWHLT_34.root',
+    ),
     duplicateCheckMode=cms.untracked.string('noDuplicateCheck'),
     skipBadFiles=cms.untracked.bool(True),
 )
