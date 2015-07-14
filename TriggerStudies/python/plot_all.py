@@ -10,9 +10,9 @@ varial.raise_root_error_level()
 varial.settings.canvas_size_x = 1138
 varial.settings.canvas_size_y = 744
 varial.settings.root_style.SetPadLeftMargin(0.1)
-varial.settings.root_style.SetPadRightMargin(0.05)
-varial.settings.root_style.SetPadTopMargin(0.075)
-varial.settings.root_style.SetPadBottomMargin(0.11)
+varial.settings.root_style.SetPadRightMargin(0.1)
+varial.settings.root_style.SetPadTopMargin(0.1)
+varial.settings.root_style.SetPadBottomMargin(0.1)
 
 
 def plot_maker(wrps):
@@ -118,6 +118,16 @@ def mk_txtbx_sim():
     return txtbx
 
 
+def mk_txtbx_2015():
+    txtbx = ROOT.TLatex(0.9,0.92," 2015, 13 TeV")
+    txtbx.SetNDC()
+    txtbx.SetTextAlign(31)
+    txtbx.SetTextFont(42)
+    txtbx.SetTextSize(0.06)
+    txtbx.SetLineWidth(2)
+    return txtbx
+
+
 class MyPlotStyler(varial.util.Decorator):
     def do_final_cosmetics(self):
         self.decoratee.do_final_cosmetics()
@@ -146,15 +156,26 @@ def plotter_factory(**kws):
         ),
         varial.rnd.TextBox(textbox=mk_txtbx_cms()),
         varial.rnd.TextBox(textbox=mk_txtbx_sim()),
+        varial.rnd.TextBox(textbox=mk_txtbx_2015()),
         MyPlotStyler(),
     ]
     return varial.tools.Plotter(**kws)
 
 
 varial.tools.Runner(varial.tools.mk_rootfile_plotter(
-    #pattern='trgout_test_TprimeB_800.root',
+    # pattern='trgout_test_TprimeB_800.root',
     plotter_factory=plotter_factory,
     flat=True,
     name='VLQTrig'
 ))
 varial.tools.WebCreator().run()
+
+
+
+# HLT_AK8PFJet360_TrimMass30 : Trimmed AK8 jet mass > 30 GeV, p_{T} > 360 GeV
+# HLT_AK8PFHT700_TrimR0p1PT0p03Mass50 : AK8 H_{T} > 700 GeV, trimmed AK8 jet mass > 30 GeV
+# HLT_AK8DiPFJet280_200_TrimMass30_BTagCSV0p45_v2 : Trimmed AK8 jet mass > 30 GeV, trimmed AK8 jet p_{T} > 280 GeV, trimmed AK8 jet p_{T} > 200 GeV
+# HLT_Ele45_CaloIdVT_GsfTrkIdT_PFJet200_PFJet50 : Non-isolated electron p_{T} > 45 GeV, cleaned AK4 jet p_{T} > 200 GeV, cleaned AK4 jet p_{T} > 50 GeV
+# HLT_Mu40_eta2p1_PFJet200_PFJet50 : Non-isolated muon p_{T} > 40 GeV, cleaned AK4 jet p_{T} > 200 GeV, cleaned AK4 jet p_{T} > 50 GeV
+# HLT_PFHT800 : H_{T} > 800 GeV
+# HLT_PFJet450 : AK4 jet p_{T} > 450 GeV

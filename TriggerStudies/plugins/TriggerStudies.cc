@@ -42,6 +42,7 @@
 #include "DataFormats/MuonReco/interface/Muon.h"
 #include "DataFormats/EgammaCandidates/interface/GsfElectron.h"
 #include "DataFormats/VertexReco/interface/Vertex.h"
+#include "DataFormats/METReco/interface/PFMET.h"
 #include "DataFormats/JetReco/interface/PFJet.h"
 #include "DataFormats/JetReco/interface/PFJetCollection.h"
 #include "SimDataFormats/GeneratorProducts/interface/HepMCProduct.h"
@@ -81,6 +82,7 @@ class TriggerStudies : public edm::EDAnalyzer {
       edm::InputTag jets_inp_;
       edm::InputTag muon_inp_;
       edm::InputTag ele_inp_;
+      edm::InputTag met_inp_;
       std::string processName_;
       std::string triggerPath_;
       std::vector<std::string> triggerPathComb_;
@@ -91,6 +93,7 @@ class TriggerStudies : public edm::EDAnalyzer {
       double ele_pt_cut_;
       double st_muon_pt_;
       double st_ele_pt_;
+      double st_lead_jet_pt_;
       int mode_;  // muon: 0, electron: 1
 
 
@@ -111,13 +114,15 @@ TriggerStudies::TriggerStudies(const edm::ParameterSet& iConfig)
    jets_inp_	    = iConfig.getParameter<edm::InputTag> ( "jets_inp" );
    muon_inp_	    = iConfig.getParameter<edm::InputTag> ( "muon_inp" );
    ele_inp_	        = iConfig.getParameter<edm::InputTag> ( "ele_inp" );
+   met_inp_	        = iConfig.getParameter<edm::InputTag> ( "met_inp" );
    jet_lead_pt_cut_ = iConfig.getParameter<double> ( "jet_lead_pt" );
    jet_subl_pt_cut_ = iConfig.getParameter<double> ( "jet_subl_pt" );
    jet_eta_         = iConfig.getParameter<double> ( "jet_eta" );
    muon_pt_cut_     = iConfig.getParameter<double> ( "muon_pt_cut" );
    ele_pt_cut_      = iConfig.getParameter<double> ( "ele_pt_cut" );
-   st_muon_pt_     = iConfig.getParameter<double> ( "st_muon_pt" );
-   st_ele_pt_      = iConfig.getParameter<double> ( "st_ele_pt" );
+   st_muon_pt_      = iConfig.getParameter<double> ( "st_muon_pt" );
+   st_ele_pt_       = iConfig.getParameter<double> ( "st_ele_pt" );
+   st_lead_jet_pt_  = iConfig.getParameter<double> ( "st_lead_jet_pt" );
    mode_            = iConfig.getParameter<int> ( "mode" );
 }
 
@@ -231,6 +236,9 @@ TriggerStudies::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
    edm::Handle<edm::View<reco::GsfElectron> > ele_coll;
    iEvent.getByLabel(ele_inp_, ele_coll);
 
+   edm::Handle<edm::View<reco::PFMET> > met_coll;
+   iEvent.getByLabel(met_inp_, met_coll);
+
    edm::Handle<edm::View<reco::Vertex> > vtx_coll;
    iEvent.getByLabel("offlinePrimaryVertices", vtx_coll);
 
@@ -273,6 +281,7 @@ TriggerStudies::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
       }
    }
    st += lepton_pt;
+   st += met_coll->at(0).pt();
 
    // baseline
    histos1D_[ "leptonPt" ]->Fill(lepton_pt);
@@ -313,7 +322,7 @@ TriggerStudies::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
    // check st
    double st_lep_pt_cut = (mode_) ? st_ele_pt_ : st_muon_pt_;
    if (lepton_pt > st_lep_pt_cut
-       && jet_lead_pt > 100.) {
+       && jet_lead_pt > st_lead_jet_pt_) {
       histos1D_[ "STDenom" ]->Fill(st);
       if (trig_accept) {
          histos1D_[ "STPassing" ]->Fill(st);
@@ -329,21 +338,21 @@ TriggerStudies::beginJob()
   
   edm::Service< TFileService > fs;
 
-  histos1D_[ "leptonPt"         ] = fs->make< TH1D >( "1leptonPt", ";Lepton p_{T} [GeV];", 70, 1e-20, 700);
-  histos1D_[ "leptonPtDenom"    ] = fs->make< TH1D >( "1leptonPtDenom", ";Lepton p_{T} [GeV];", 70, 0., 700);
-  histos1D_[ "leptonPtPassing"  ] = fs->make< TH1D >( "1leptonPtPassing", ";Lepton p_{T} [GeV];", 70, 0., 700);
+  histos1D_[ "leptonPt"         ] = fs->make< TH1D >( "1leptonPt", ";Lepton p_{T} [GeV];", 250, 1e-20, 500);
+  histos1D_[ "leptonPtDenom"    ] = fs->make< TH1D >( "1leptonPtDenom", ";Lepton p_{T} [GeV];", 250, 1e-20, 500);
+  histos1D_[ "leptonPtPassing"  ] = fs->make< TH1D >( "1leptonPtPassing", ";Lepton p_{T} [GeV];", 250, 1e-20, 500);
 
-  histos1D_[ "jetPt"            ] = fs->make< TH1D >( "2leadJetPt", ";Leading Jet p_{T} [GeV];", 50, 0., 1000);
-  histos1D_[ "jetPtDenom"       ] = fs->make< TH1D >( "2leadJetPtDenom", ";Leading Jet p_{T} [GeV];", 50, 0., 1000);
-  histos1D_[ "jetPtPassing"     ] = fs->make< TH1D >( "2leadJetPtPassing", ";Leading Jet p_{T} [GeV];", 50, 0., 1000);
+  histos1D_[ "jetPt"            ] = fs->make< TH1D >( "2leadJetPt", ";Leading Jet p_{T} [GeV];", 200, 0., 1000);
+  histos1D_[ "jetPtDenom"       ] = fs->make< TH1D >( "2leadJetPtDenom", ";Leading Jet p_{T} [GeV];", 200, 0., 1000);
+  histos1D_[ "jetPtPassing"     ] = fs->make< TH1D >( "2leadJetPtPassing", ";Leading Jet p_{T} [GeV];", 200, 0., 1000);
 
-  histos1D_[ "jet2Pt"           ] = fs->make< TH1D >( "3subleadJetPt", ";Subleading Jet p_{T} [GeV];", 50, 0., 1000);
-  histos1D_[ "jet2PtDenom"      ] = fs->make< TH1D >( "3subleadJetPtDenom", ";Subleading Jet p_{T} [GeV];", 50, 0., 1000);
-  histos1D_[ "jet2PtPassing"    ] = fs->make< TH1D >( "3subleadJetPtPassing", ";Subleading Jet p_{T} [GeV];", 50, 0., 1000);
+  histos1D_[ "jet2Pt"           ] = fs->make< TH1D >( "3subleadJetPt", ";Subleading Jet p_{T} [GeV];", 200, 0., 1000);
+  histos1D_[ "jet2PtDenom"      ] = fs->make< TH1D >( "3subleadJetPtDenom", ";Subleading Jet p_{T} [GeV];", 200, 0., 1000);
+  histos1D_[ "jet2PtPassing"    ] = fs->make< TH1D >( "3subleadJetPtPassing", ";Subleading Jet p_{T} [GeV];", 200, 0., 1000);
 
-  histos1D_[ "ST"               ] = fs->make< TH1D >( "4ST", ";Sum of p_{T} of Leading Lepton and all Jets with p_{T}>40GeV [GeV];", 40, 0., 2000);
-  histos1D_[ "STDenom"          ] = fs->make< TH1D >( "4STDenom", ";Sum of p_{T} of Leading Lepton and all Jets with p_{T}>40GeV [GeV];", 40, 0., 2000);
-  histos1D_[ "STPassing"        ] = fs->make< TH1D >( "4STPassing", ";Sum of p_{T} of Leading Lepton and all Jets with p_{T}>40GeV [GeV];", 40, 0., 2000);
+  histos1D_[ "ST"               ] = fs->make< TH1D >( "4ST", ";Sum of p_{T} of Leading Lepton and all Jets with p_{T}>40GeV [GeV];", 200, 0., 2000);
+  histos1D_[ "STDenom"          ] = fs->make< TH1D >( "4STDenom", ";Sum of p_{T} of Leading Lepton and all Jets with p_{T}>40GeV [GeV];", 200, 0., 2000);
+  histos1D_[ "STPassing"        ] = fs->make< TH1D >( "4STPassing", ";Sum of p_{T} of Leading Lepton and all Jets with p_{T}>40GeV [GeV];", 200, 0., 2000);
 }
 
 // ------------ method called once each job just after ending the event loop  ------------

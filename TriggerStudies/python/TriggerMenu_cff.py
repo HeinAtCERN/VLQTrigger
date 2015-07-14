@@ -35,7 +35,7 @@ trigStudySequence = cms.Sequence()
 for comb in (0, 3, 99):
     for triggerpath in triggermenu:
         triggerpath, other_trgs = triggerpath[0], triggerpath[1:]
-        name = triggerpath[4:-3]+('_COMBO_%02d' % comb if comb else '')
+        name = triggerpath[4:-2]+('_COMBO_%02d' % comb if comb else '')
         globals()[name] = cms.EDAnalyzer(
             "TriggerStudies",
             process_name    = cms.string('MYHLT'),
@@ -44,22 +44,20 @@ for comb in (0, 3, 99):
             jets_inp        = cms.InputTag("pfJetsPFBRECOPFlow"),  #ak4PFJetsCHS"),
             muon_inp        = cms.InputTag("muons"),
             ele_inp         = cms.InputTag("gedGsfElectrons"),
+            met_inp         = cms.InputTag("pfMet"),
             jet_lead_pt     = cms.double(250),
             jet_subl_pt     = cms.double(65),
             jet_eta         = cms.double(2.4),
             muon_pt_cut     = cms.double(45.),
-            ele_pt_cut      = cms.double(55. if '_PFJet' in triggerpath else 120.),
+            ele_pt_cut      = cms.double(55.),
             st_muon_pt      = cms.double(26.),
             st_ele_pt       = cms.double(34.),
+            st_lead_jet_pt  = cms.double(100.),
             mode            = cms.int32(0 if triggerpath.startswith('HLT_Mu') else 1),
         )
         trigStudySequence += globals()[name]
 
 
-
-# TODO: processname?
-# TODO: PFHT800?
-# TODO: trigger path version => v2?
 # TODO: include MET in ST??
 
 

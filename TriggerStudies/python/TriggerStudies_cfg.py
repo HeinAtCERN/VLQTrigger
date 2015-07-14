@@ -1,5 +1,6 @@
 import FWCore.ParameterSet.Config as cms
 import sys
+import glob
 
 process = cms.Process("TriggerStudies")
 
@@ -22,7 +23,7 @@ process.source = cms.Source(
     "PoolSource",
     fileNames=cms.untracked.vstring(
         #'file:/nfs/dust/cms/user/tholenhe/tmp/test_TprimeB_800.root',
-        'file:/nfs/dust/cms/user/tholenhe/tmp/RECO_8.root',
+        map(lambda s: 'file:'+s, glob.glob('/nfs/dust/cms/user/tholenhe/tmp/RECO_*.root')),
         #'file:/nfs/dust/cms/user/tholenhe/tmp/GENSIMRAWHLT_26.root',
         #'file:/nfs/dust/cms/user/tholenhe/tmp/GENSIMRAWHLT_34.root',
     ),
