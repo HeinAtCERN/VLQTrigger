@@ -45,6 +45,7 @@
 #include "DataFormats/METReco/interface/PFMET.h"
 #include "DataFormats/JetReco/interface/PFJet.h"
 #include "DataFormats/JetReco/interface/PFJetCollection.h"
+#include "DataFormats/ParticleFlowCandidate/interface/PFCandidate.h"
 #include "SimDataFormats/GeneratorProducts/interface/HepMCProduct.h"
 #include "SimDataFormats/GeneratorProducts/interface/GenEventInfoProduct.h"
 #include "SimDataFormats/GeneratorProducts/interface/GenRunInfoProduct.h"
@@ -230,10 +231,10 @@ TriggerStudies::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
    edm::Handle<edm::View<reco::PFJet> > jets_coll;
    iEvent.getByLabel(jets_inp_, jets_coll);
 
-   edm::Handle<edm::View<reco::Muon> > muon_coll;
+   edm::Handle<edm::View<reco::PFCandidate> > muon_coll;
    iEvent.getByLabel(muon_inp_, muon_coll);
 
-   edm::Handle<edm::View<reco::GsfElectron> > ele_coll;
+   edm::Handle<edm::View<reco::PFCandidate> > ele_coll;
    iEvent.getByLabel(ele_inp_, ele_coll);
 
    edm::Handle<edm::View<reco::PFMET> > met_coll;
@@ -251,7 +252,7 @@ TriggerStudies::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
    if (mode_ == 1) {
       lepton_pt_cut = ele_pt_cut_;
       for (auto i = ele_coll->begin(); i!=ele_coll->end(); ++i) {
-         if (accept_ele(*i)) {  // (*i).pt() > ele_pt_cut_ && 
+         if (accept_ele(*(i->gsfElectronRef().get()))) {  // (*i).pt() > ele_pt_cut_ &&
             lepton_pt = i->pt();
             break;
          }
@@ -259,7 +260,7 @@ TriggerStudies::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
    } else {
       lepton_pt_cut = muon_pt_cut_;
       for (auto i = muon_coll->begin(); i!=muon_coll->end(); ++i) {
-         if (accept_mu(*i, *(vtx_coll->begin()))) {  // (*i).pt() > muon_pt_cut_ && 
+         if (accept_mu(*(i->muonRef().get()), *(vtx_coll->begin()))) {  // (*i).pt() > muon_pt_cut_ &&
             lepton_pt = i->pt();
             break;
          }
@@ -350,9 +351,9 @@ TriggerStudies::beginJob()
   histos1D_[ "jet2PtDenom"      ] = fs->make< TH1D >( "3subleadJetPtDenom", ";Subleading Jet p_{T} [GeV];", 200, 0., 1000);
   histos1D_[ "jet2PtPassing"    ] = fs->make< TH1D >( "3subleadJetPtPassing", ";Subleading Jet p_{T} [GeV];", 200, 0., 1000);
 
-  histos1D_[ "ST"               ] = fs->make< TH1D >( "4ST", ";Sum of p_{T} of Leading Lepton and all Jets with p_{T}>40GeV [GeV];", 200, 0., 2000);
-  histos1D_[ "STDenom"          ] = fs->make< TH1D >( "4STDenom", ";Sum of p_{T} of Leading Lepton and all Jets with p_{T}>40GeV [GeV];", 200, 0., 2000);
-  histos1D_[ "STPassing"        ] = fs->make< TH1D >( "4STPassing", ";Sum of p_{T} of Leading Lepton and all Jets with p_{T}>40GeV [GeV];", 200, 0., 2000);
+  histos1D_[ "ST"               ] = fs->make< TH1D >( "4ST", ";Sum of p_{T} of Leading Lepton, MET and all Jets with p_{T}>40GeV [GeV];", 200, 0., 2000);
+  histos1D_[ "STDenom"          ] = fs->make< TH1D >( "4STDenom", ";Sum of p_{T} of Leading Lepton, MET and all Jets with p_{T}>40GeV [GeV];", 200, 0., 2000);
+  histos1D_[ "STPassing"        ] = fs->make< TH1D >( "4STPassing", ";Sum of p_{T} of Leading Lepton, MET and all Jets with p_{T}>40GeV [GeV];", 200, 0., 2000);
 }
 
 // ------------ method called once each job just after ending the event loop  ------------

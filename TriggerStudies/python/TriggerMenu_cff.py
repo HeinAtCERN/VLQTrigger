@@ -36,14 +36,16 @@ for comb in (0, 3, 99):
     for triggerpath in triggermenu:
         triggerpath, other_trgs = triggerpath[0], triggerpath[1:]
         name = triggerpath[4:-2]+('_COMBO_%02d' % comb if comb else '')
+        print 'Name:  ', name
+        print 'Others:', other_trgs[:comb]
         globals()[name] = cms.EDAnalyzer(
             "TriggerStudies",
             process_name    = cms.string('MYHLT'),
             triggerpath     = cms.string(triggerpath),
             triggerpathcomb = cms.vstring(other_trgs[:comb]),
             jets_inp        = cms.InputTag("pfJetsPFBRECOPFlow"),  #ak4PFJetsCHS"),
-            muon_inp        = cms.InputTag("muons"),
-            ele_inp         = cms.InputTag("gedGsfElectrons"),
+            muon_inp        = cms.InputTag("pfIsolatedMuonsPFBRECOPFlow"),  # muons"),
+            ele_inp         = cms.InputTag("pfIsolatedElectronsPFBRECOPFlow"),  # gedGsfElectrons"),
             met_inp         = cms.InputTag("pfMet"),
             jet_lead_pt     = cms.double(250),
             jet_subl_pt     = cms.double(65),
@@ -56,9 +58,6 @@ for comb in (0, 3, 99):
             mode            = cms.int32(0 if triggerpath.startswith('HLT_Mu') else 1),
         )
         trigStudySequence += globals()[name]
-
-
-# TODO: include MET in ST??
 
 
 if __name__ == '__main__':

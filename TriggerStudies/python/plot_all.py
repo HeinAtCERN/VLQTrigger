@@ -7,6 +7,7 @@ import varial.util
 
 varial.settings.max_num_processes = 1
 varial.raise_root_error_level()
+varial.settings.rootfile_postfixes += ['.pdf', '.C']
 varial.settings.canvas_size_x = 1138
 varial.settings.canvas_size_y = 744
 varial.settings.root_style.SetPadLeftMargin(0.1)
@@ -15,60 +16,123 @@ varial.settings.root_style.SetPadTopMargin(0.1)
 varial.settings.root_style.SetPadBottomMargin(0.1)
 
 
+bins_lepton_pt = (
+      range(0, 60, 4)
+    + range(60, 100, 10)
+    + range(100, 200, 20)
+    + range(200, 350, 50)
+    + [400]
+)
+bins_lead_jet_pt = (
+      range(50, 100, 20)
+    + range(100, 300, 10)
+    + range(300, 400, 20)
+    + range(400, 650, 50)
+    + [700]
+)
+bins_sublead_jet_pt = (
+      range(0, 250, 10)
+    + range(250, 350, 20)
+    + range(350, 450, 50)
+    + [500]
+)
+bins_st = (
+      [100, 200, 250, 300, 350]
+    + range(400, 1000, 20)
+    + range(1000, 1400, 50)
+    + range(1400, 2200, 200)
+)
+
 def plot_maker(wrps):
-    def set_y_axis_name(wrps):
+    def rebin_plots(wrps):
         for w in wrps:
-            w.obj.GetYaxis().SetTitle('Efficiency')
+            if '1leptonPt' in w.in_file_path:
+                w = varial.op.rebin(w, bins_lepton_pt, True)
+            elif '2leadJetPt' in w.in_file_path:
+                w = varial.op.rebin(w, bins_lead_jet_pt, True)
+            elif '3subleadJetPt' in w.in_file_path:
+                w = varial.op.rebin(w, bins_sublead_jet_pt, True)
+            elif '4ST' in w.in_file_path:
+                w = varial.op.rebin(w, bins_st, True)
             yield w
 
-    def set_legend_and_color(wrps):
+    def format_y_axis(wrps):
         for w in wrps:
-            w.legend = w.in_file_path.split('/')[0]
-            if w.legend[:2]=='El':
-                w.obj.SetMarkerColor(ROOT.kRed)
-                w.obj.SetLineColor(ROOT.kRed)
-                # w.obj.SetFillStyle(3020)
-            elif w.legend[:2]=='Mu':
-                w.obj.SetMarkerColor(ROOT.kBlue)
-                w.obj.SetLineColor(ROOT.kBlue)
-                # w.obj.SetFillStyle(3019)
+            w.obj.GetYaxis().SetTitle('Efficiency')
             w.val_y_max = 1.0
             yield w
 
-    def format_graphics(wrps):
+    def set_legend_name(wrps):
+        for w in wrps:
+            w.legend = w.in_file_path.split('/')[0]
+
+            if w.name.endswith('Eff'):
+                if 'COMBO' in w.in_file_path:
+                    if w.in_file_path[:2] == 'El':
+                        w.legend = 'Trigger combination for electrons'
+                    else:
+                        w.legend = 'Trigger combination for muons'
+                else:
+                    if w.in_file_path[:2] == 'El':
+                        w.legend = 'Non-iso. ele. p_{T} > 45 GeV, cleaned AK4 jets: p_{T} [> 200, > 50] GeV'
+                    else:
+                        w.legend = 'Non-iso. muon p_{T} > 40 GeV, cleaned AK4 jets: p_{T} [> 200, > 50] GeV'
+
+            else:
+                if w.in_file_path[:2] == 'Mu':
+                    w.legend = 'Raw distribution (only muons, MC: T\'(M=800) b > t H b)'
+                    if 'ST' in w.in_file_path and 'COMBO' in w.in_file_path:
+                        continue
+                else:
+                    continue
+                    # w.draw_option_legend = ''  # do not make legend entry
+
+            yield w
+
+    def set_colors(wrps):
+        for w in wrps:
+            if w.name.endswith('Eff'):
+                if 'COMBO' in w.in_file_path:
+                    mu_col = ROOT.kBlue + 3     # combo muon color
+                    el_col = ROOT.kGreen + 1    # combo ele color
+                else:
+                    mu_col = ROOT.kBlue         # standard muon color
+                    el_col = ROOT.kRed          # standard ele color
+
+                if w.in_file_path[:2] == 'Mu':
+                    w.obj.SetMarkerColor(mu_col)
+                    w.obj.SetLineColor(mu_col)
+                else:
+                    w.obj.SetMarkerColor(el_col)
+                    w.obj.SetLineColor(el_col)
+
+            else:
+                # these are the raw distributions
+                w.obj.SetFillColor(17)
+                w.obj.SetLineColor(15)
+                #w.obj.SetLineWidth(0)
+
+            yield w
+
+    def set_plot_style(wrps):
         for w in wrps:
             if w.name.endswith('Eff') and 'TH1' not in w.type:
+                # here are the TGraphAsymmErrors (only for error, not line)
                 w.obj.SetMarkerStyle(1)
                 w.obj.SetLineWidth(2)
                 w.draw_option_legend = 'L'
                 w.draw_option = 'ZP'
+
             elif w.name.endswith('Eff'):
+                # here are the TH1F (only for line, not errors)
                 w.obj.SetMarkerStyle(1)
                 w.obj.SetLineWidth(2)
                 w.draw_option_legend = None
                 w.draw_option = 'hist'
-            else:
-                #col = w.obj.GetMarkerColor() - 9
-                w.obj.SetFillColor(17)
-                w.obj.SetLineColor(15)
-                #w.obj.SetLineWidth(0)
+
             yield w
 
-    def format_cross_triggers(wrps):
-        for w in wrps:
-            if not w.name.endswith('Eff'):
-                #if not w.name.endswith('Eff'):
-                #    continue
-                if w.legend[:2]=='El':
-                    w.legend = 'underlying distribution'
-                else:
-                    w.draw_option_legend = ''
-            elif 'PFJet' in w.legend:
-                col = ROOT.kBlue + 3 if w.legend[:2]=='Mu' else ROOT.kGreen + 1
-                w.obj.SetMarkerColor(col)
-                w.obj.SetLineColor(col)
-            yield w
-
+    wrps = rebin_plots(wrps)
     wrps = varial.gen.gen_make_eff_graphs(
         wrps, 'Passing', 'Denom', 'Eff', yield_everything=True)
     wrps = varial.gen.gen_make_eff_graphs(
@@ -78,15 +142,17 @@ def plot_maker(wrps):
         lambda w: 'Eff' not in w.name,
         varial.op.norm_to_integral,
     )
-    wrps = set_y_axis_name(wrps)
-    wrps = set_legend_and_color(wrps)
-    wrps = format_graphics(wrps)
-    wrps = format_cross_triggers(wrps)
+    wrps = format_y_axis(wrps)
+    wrps = set_legend_name(wrps)
+    wrps = set_colors(wrps)
+    wrps = set_plot_style(wrps)
     return wrps
 
 
 def plot_grouper(wrps):
-    group_key = lambda w: str(w.in_file_path.split('/')[0][-3:]) + w.name.replace('Eff', '')
+    #group_key = lambda w: str(w.in_file_path.split('/')[0][-3:]) + w.name.replace('Eff', '')
+    group_key = lambda w: str('ST' in w.in_file_path) + w.name.replace('Eff', '')
+    wrps = sorted(wrps, key=lambda w: 'COMBO' in w.in_file_path)  # combo to front
     wrps = sorted(wrps, key=lambda w: w.name[::-1])  # All Eff stuff to back
     # for w in wrps: print w.name
     wrps = sorted(wrps, key=group_key)
@@ -100,7 +166,7 @@ def plot_grouper(wrps):
 
 def mk_txtbx_cms():
     txtbx = ROOT.TLatex(
-        0.6137566,0.4793003,"CMS")  # default y: 0.6793003
+        0.6137566,0.3793003,"CMS")  # default y: 0.6793003
     txtbx.SetNDC()
     txtbx.SetTextFont(61)
     txtbx.SetTextSize(0.06122449)
@@ -110,7 +176,7 @@ def mk_txtbx_cms():
 
 def mk_txtbx_sim():
     txtbx = ROOT.TLatex(
-        0.617284,0.4355685,"Simulation Preliminary")  # default y: 0.6355685
+        0.617284,0.3355685,"Simulation Preliminary")  # default y: 0.6355685
     txtbx.SetNDC()
     txtbx.SetTextFont(52)
     txtbx.SetTextSize(0.0451895)
@@ -148,9 +214,14 @@ def plotter_factory(**kws):
     kws['hook_loaded_histos'] = plot_maker
     kws['plot_setup'] = None
     kws['plot_grouper'] = plot_grouper
+    kws['save_name_func'] = lambda c: c.name
     kws['canvas_decorators'] = [
         varial.rnd.Legend(
-            xy_coords=(0.4294533,0.1676385,0.8924162,0.2959184),
+            # xy_coords=(0.3294533,0.1676385,0.574162,0.2959184),
+            x_pos=(0.574162 - 0.3294533)/2. + 0.3294533,
+            label_width=(0.574162 - 0.3294533),
+            y_pos=(0.2959184 - 0.1676385)/2. + 0.1676385,
+            label_height=0.035,
             text_size=0.028,
             text_font=42,
         ),
@@ -162,8 +233,16 @@ def plotter_factory(**kws):
     return varial.tools.Plotter(**kws)
 
 
+def input_filter_keyfunc(wrp):
+    return (
+        ('ST' in wrp.in_file_path or 'COMBO' not in wrp.in_file_path)
+        and '99' not in wrp.in_file_path
+    )
+
+
 varial.tools.Runner(varial.tools.mk_rootfile_plotter(
-    # pattern='trgout_test_TprimeB_800.root',
+    pattern='trgout_test_new2.root',
+    filter_keyfunc=input_filter_keyfunc,
     plotter_factory=plotter_factory,
     flat=True,
     name='VLQTrig'
@@ -171,11 +250,6 @@ varial.tools.Runner(varial.tools.mk_rootfile_plotter(
 varial.tools.WebCreator().run()
 
 
-
-# HLT_AK8PFJet360_TrimMass30 : Trimmed AK8 jet mass > 30 GeV, p_{T} > 360 GeV
-# HLT_AK8PFHT700_TrimR0p1PT0p03Mass50 : AK8 H_{T} > 700 GeV, trimmed AK8 jet mass > 30 GeV
-# HLT_AK8DiPFJet280_200_TrimMass30_BTagCSV0p45_v2 : Trimmed AK8 jet mass > 30 GeV, trimmed AK8 jet p_{T} > 280 GeV, trimmed AK8 jet p_{T} > 200 GeV
 # HLT_Ele45_CaloIdVT_GsfTrkIdT_PFJet200_PFJet50 : Non-isolated electron p_{T} > 45 GeV, cleaned AK4 jet p_{T} > 200 GeV, cleaned AK4 jet p_{T} > 50 GeV
 # HLT_Mu40_eta2p1_PFJet200_PFJet50 : Non-isolated muon p_{T} > 40 GeV, cleaned AK4 jet p_{T} > 200 GeV, cleaned AK4 jet p_{T} > 50 GeV
 # HLT_PFHT800 : H_{T} > 800 GeV
-# HLT_PFJet450 : AK4 jet p_{T} > 450 GeV
