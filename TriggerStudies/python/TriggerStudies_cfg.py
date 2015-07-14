@@ -15,13 +15,14 @@ process.options = cms.untracked.PSet(allowUnscheduled=cms.untracked.bool(True))
 
 process.TFileService=cms.Service(
     "TFileService",
-    fileName=cms.string('trgout_test_TprimeB_800.root'),
+    fileName=cms.string('trgout_test_new.root'),
 )
 
 process.source = cms.Source(
     "PoolSource",
     fileNames=cms.untracked.vstring(
-        'file:/nfs/dust/cms/user/tholenhe/tmp/test_TprimeB_800.root',
+        #'file:/nfs/dust/cms/user/tholenhe/tmp/test_TprimeB_800.root',
+        'file:/nfs/dust/cms/user/tholenhe/tmp/RECO_8.root',
         #'file:/nfs/dust/cms/user/tholenhe/tmp/GENSIMRAWHLT_26.root',
         #'file:/nfs/dust/cms/user/tholenhe/tmp/GENSIMRAWHLT_34.root',
     ),

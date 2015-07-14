@@ -22,9 +22,9 @@ varial.settings.defaults_Legend.update({
 #    'reverse': True
 #})#
 
-varial.settings.canvas_size_x = 650
-varial.settings.canvas_size_y = 400
-#varial.settings.root_style.SetPadRightMargin(0.3)
+varial.settings.canvas_size_x = 1138
+varial.settings.canvas_size_y = 744
+varial.settings.root_style.SetPadRightMargin(0.1)
 
 def plot_maker(wrps):
     def set_y_axis_name(wrps):
@@ -43,7 +43,7 @@ def plot_maker(wrps):
                 w.obj.SetMarkerColor(ROOT.kBlue)
                 w.obj.SetLineColor(ROOT.kBlue)
                 # w.obj.SetFillStyle(3019)
-            w.val_y_max = 1.1
+            w.val_y_max = 1.0
             yield w
 
     def format_graphics(wrps):
@@ -97,7 +97,7 @@ def plot_maker(wrps):
 
 
 def plot_grouper(wrps):
-    group_key = lambda w: str('_COMBO' in w.in_file_path) + w.name.replace('Eff', '')
+    group_key = lambda w: str(w.in_file_path.split('/')[0][-3:]) + w.name.replace('Eff', '')
     wrps = sorted(wrps, key=lambda w: w.name[::-1])  # All Eff stuff to back
     # for w in wrps: print w.name
     wrps = sorted(wrps, key=group_key)
@@ -109,15 +109,21 @@ def plot_grouper(wrps):
     return wrps
 
 
-def mk_txtbx():
-    txtbx = ROOT.TPaveText(0.28, 0.24, 0.9, 0.27, 'brNDC')
-    txtbx.AddText('CMS Simulation Preliminary')
-    txtbx.SetTextSize(0.042)
-    txtbx.SetFillStyle(0)
-    txtbx.SetBorderSize(0)
-    txtbx.SetTextAlign(13)
-    txtbx.SetMargin(0.0)
-    txtbx.SetFillColor(0)
+def mk_txtbx_cms():
+    txtbx = ROOT.TLatex(0.6137566,0.6793003,"CMS")
+    txtbx.SetNDC()
+    txtbx.SetTextFont(61)
+    txtbx.SetTextSize(0.06122449)
+    txtbx.SetLineWidth(2)
+    return txtbx
+
+
+def mk_txtbx_sim():
+    txtbx = ROOT.TLatex(0.617284,0.6355685,"Simulation Preliminary")
+    txtbx.SetNDC()
+    txtbx.SetTextFont(52)
+    txtbx.SetTextSize(0.0451895)
+    txtbx.SetLineWidth(2)
     return txtbx
 
 
@@ -127,7 +133,8 @@ def plotter_factory(**kws):
     kws['plot_grouper'] = plot_grouper
     kws['canvas_decorators'] = [
         varial.rnd.Legend,
-        varial.rnd.TextBox(textbox=mk_txtbx())
+        varial.rnd.TextBox(textbox=mk_txtbx_cms()),
+        varial.rnd.TextBox(textbox=mk_txtbx_sim()),
     ]
     return varial.tools.Plotter(**kws)
 
