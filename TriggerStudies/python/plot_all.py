@@ -3,28 +3,17 @@
 import ROOT
 import varial
 import varial.tools
+import varial.util
 
-#varial.settings.max_num_processes = 1
+varial.settings.max_num_processes = 1
 varial.raise_root_error_level()
-varial.settings.defaults_Legend.update({
-    'x_pos': 0.2,  # left edge
-    'label_width': 0.2,
-    'label_height': 0.03,
-})
-
-#varial.settings.defaults_Legend.update({
-#    'x_pos': 0.85,
-#    'y_pos': 0.5,
-#    'label_width': 0.28,
-#    'label_height': 0.04,
-#    'opt': 'f',
-#    'opt_data': 'p',
-#    'reverse': True
-#})#
-
 varial.settings.canvas_size_x = 1138
 varial.settings.canvas_size_y = 744
-varial.settings.root_style.SetPadRightMargin(0.1)
+varial.settings.root_style.SetPadLeftMargin(0.1)
+varial.settings.root_style.SetPadRightMargin(0.05)
+varial.settings.root_style.SetPadTopMargin(0.075)
+varial.settings.root_style.SetPadBottomMargin(0.11)
+
 
 def plot_maker(wrps):
     def set_y_axis_name(wrps):
@@ -110,7 +99,8 @@ def plot_grouper(wrps):
 
 
 def mk_txtbx_cms():
-    txtbx = ROOT.TLatex(0.6137566,0.6793003,"CMS")
+    txtbx = ROOT.TLatex(
+        0.6137566,0.4793003,"CMS")  # default y: 0.6793003
     txtbx.SetNDC()
     txtbx.SetTextFont(61)
     txtbx.SetTextSize(0.06122449)
@@ -119,7 +109,8 @@ def mk_txtbx_cms():
 
 
 def mk_txtbx_sim():
-    txtbx = ROOT.TLatex(0.617284,0.6355685,"Simulation Preliminary")
+    txtbx = ROOT.TLatex(
+        0.617284,0.4355685,"Simulation Preliminary")  # default y: 0.6355685
     txtbx.SetNDC()
     txtbx.SetTextFont(52)
     txtbx.SetTextSize(0.0451895)
@@ -127,14 +118,35 @@ def mk_txtbx_sim():
     return txtbx
 
 
+class MyPlotStyler(varial.util.Decorator):
+    def do_final_cosmetics(self):
+        self.decoratee.do_final_cosmetics()
+        h = self.first_drawn
+        h.GetXaxis().SetLabelFont(42)
+        h.GetXaxis().SetLabelSize(0.035)
+        h.GetXaxis().SetTitleSize(0.035)
+        h.GetXaxis().SetTitleOffset(1.4)
+        h.GetXaxis().SetTitleFont(42)
+        h.GetYaxis().SetLabelFont(42)
+        h.GetYaxis().SetLabelSize(0.035)
+        h.GetYaxis().SetTitleSize(0.035)
+        h.GetYaxis().SetTitleOffset(1.0)
+        h.GetYaxis().SetTitleFont(42)
+
+
 def plotter_factory(**kws):
     kws['hook_loaded_histos'] = plot_maker
     kws['plot_setup'] = None
     kws['plot_grouper'] = plot_grouper
     kws['canvas_decorators'] = [
-        varial.rnd.Legend,
+        varial.rnd.Legend(
+            xy_coords=(0.4294533,0.1676385,0.8924162,0.2959184),
+            text_size=0.028,
+            text_font=42,
+        ),
         varial.rnd.TextBox(textbox=mk_txtbx_cms()),
         varial.rnd.TextBox(textbox=mk_txtbx_sim()),
+        MyPlotStyler(),
     ]
     return varial.tools.Plotter(**kws)
 
