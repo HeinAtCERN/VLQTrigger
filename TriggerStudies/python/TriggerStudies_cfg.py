@@ -16,7 +16,7 @@ process.options = cms.untracked.PSet(allowUnscheduled=cms.untracked.bool(True))
 
 process.TFileService=cms.Service(
     "TFileService",
-    fileName=cms.string('trgout_test_new2.root'),
+    fileName=cms.string('trgout_test_new.root'),
 )
 
 process.source = cms.Source(

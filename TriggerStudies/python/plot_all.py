@@ -7,7 +7,7 @@ import varial.util
 
 varial.settings.max_num_processes = 1
 varial.raise_root_error_level()
-varial.settings.rootfile_postfixes += ['.pdf', '.C']
+varial.settings.rootfile_postfixes += ['.pdf', '.eps', '.C']
 varial.settings.canvas_size_x = 1138
 varial.settings.canvas_size_y = 744
 varial.settings.root_style.SetPadLeftMargin(0.1)
@@ -241,7 +241,7 @@ def input_filter_keyfunc(wrp):
 
 
 varial.tools.Runner(varial.tools.mk_rootfile_plotter(
-    pattern='trgout_test_new2.root',
+    pattern='*.root',
     filter_keyfunc=input_filter_keyfunc,
     plotter_factory=plotter_factory,
     flat=True,
