@@ -16,6 +16,11 @@ triggermenu = [
         "HLT_Ele32_eta2p1_WPLoose_Gsf_TriCentralPFJet50_40_30_v",
     ),
     (
+        "HLT_Ele32_eta2p1_WPLoose_Gsf_v",
+        "HLT_Ele105_CaloIdVT_GsfTrkIdT_v",
+        "HLT_PFHT800_v",
+    ),
+    (
         "HLT_Mu40_eta2p1_PFJet200_PFJet50_v",
         "HLT_Mu45_eta2p1_v",
         "HLT_IsoMu24_eta2p1_v",
@@ -32,7 +37,7 @@ triggermenu = [
 ]
 
 trigStudySequence = cms.Sequence()
-for comb in (0, 3, 99):
+for comb in (0, 3):  # , 99):
     for triggerpath in triggermenu:
         triggerpath, other_trgs = triggerpath[0], triggerpath[1:]
         name = triggerpath[4:-2]+('_COMBO_%02d' % comb if comb else '')

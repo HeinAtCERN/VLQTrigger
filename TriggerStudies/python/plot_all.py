@@ -79,9 +79,10 @@ def plot_maker(wrps):
                         w.legend = 'Non-iso. muon p_{T} > 40 GeV, cleaned AK4 jets: p_{T} [> 200, > 50] GeV'
 
             else:
-                if w.in_file_path[:2] == 'Mu':
-                    w.legend = 'Raw distribution (only muons, MC: T\'(M=800) b > t H b)'
-                    if 'ST' in w.in_file_path and 'COMBO' in w.in_file_path:
+                if w.in_file_path[:2] == 'El':
+                    w.legend = 'Raw distribution (only electrons, MC: T\'(M=800) b > t H b)'
+                    #if 'ST' in w.in_file_path and 'COMBO' in w.in_file_path:
+                    if 'PFJet' in w.in_file_path:
                         continue
                 else:
                     continue
@@ -105,6 +106,11 @@ def plot_maker(wrps):
                 else:
                     w.obj.SetMarkerColor(el_col)
                     w.obj.SetLineColor(el_col)
+
+                if 'ST' in w.in_file_path and 'PFJet' in w.in_file_path:
+                    w.legend = 'Trigger combination for electrons (incl. ele+jets trigger)'
+                    w.obj.SetMarkerColor(ROOT.kRed)
+                    w.obj.SetLineColor(ROOT.kRed)
 
             else:
                 # these are the raw distributions
@@ -234,9 +240,15 @@ def plotter_factory(**kws):
 
 
 def input_filter_keyfunc(wrp):
-    return (
-        ('ST' in wrp.in_file_path or 'COMBO' not in wrp.in_file_path)
-        and '99' not in wrp.in_file_path
+    ifp = wrp.in_file_path
+    return (  # normal trigger-leg histos
+        'COMBO' not in ifp 
+        and 'ST' not in ifp
+        and 'PFJet' in ifp
+    ) or (  # ST histograms
+        'ST' in ifp
+        and 'Ele' in ifp
+        and 'COMBO' in ifp
     )
 
 

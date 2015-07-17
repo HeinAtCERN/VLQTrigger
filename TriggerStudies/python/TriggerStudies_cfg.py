@@ -16,7 +16,7 @@ process.options = cms.untracked.PSet(allowUnscheduled=cms.untracked.bool(True))
 
 process.TFileService=cms.Service(
     "TFileService",
-    fileName=cms.string('trgout_test_new.root'),
+    fileName=cms.string('trgout_test.root'),
 )
 
 process.source = cms.Source(
@@ -24,8 +24,6 @@ process.source = cms.Source(
     fileNames=cms.untracked.vstring(
         #'file:/nfs/dust/cms/user/tholenhe/tmp/test_TprimeB_800.root',
         map(lambda s: 'file:'+s, glob.glob('/nfs/dust/cms/user/tholenhe/tmp/RECO_*.root')),
-        #'file:/nfs/dust/cms/user/tholenhe/tmp/GENSIMRAWHLT_26.root',
-        #'file:/nfs/dust/cms/user/tholenhe/tmp/GENSIMRAWHLT_34.root',
     ),
     duplicateCheckMode=cms.untracked.string('noDuplicateCheck'),
     skipBadFiles=cms.untracked.bool(True),
